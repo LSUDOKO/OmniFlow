@@ -336,4 +336,132 @@ For support and questions:
 
 ---
 
+## 🧭 Onboarding Flow (Product + Tech)
+
+The onboarding experience adapts dynamically to the user's region, locale, and KYC requirements. Steps are sourced from `src/services/paymentService.ts` and localized via `src/services/localizationService.ts`. The flow is orchestrated by `src/components/onboarding/OnboardingFlow.tsx`.
+
+### Flow Overview
+
+```mermaid
+flowchart TD
+    A[Open Onboarding Modal] --> B{Detect Region}
+    B -->|<3.5s| C[Region = Detected]
+    B -->|Timeout/Fail| D[Fallback Region = US]
+    C --> E[Detect Browser Locale]
+    D --> E
+    E --> F[Set Locale + Build Steps]
+    F --> G[Welcome]
+    G --> H[Region Selection]
+    H --> I[Wallet Setup]
+    I --> J{KYC Requirements}
+    J -->|email| K[Email Verification]
+    J -->|phone| L[Phone Verification]
+    J -->|ID/Docs| M[Identity Verification]
+    K --> N[Payment Setup]
+    L --> N
+    M --> N
+    I --> N
+    N --> O[Completion]
+    O --> P[Close + Persist Onboarding Data]
+```
+
+### State and Progression
+- __Region detection timeout__: 3.5s with safe default to `US` and in-modal loader.
+- __Auto-advance__: `Welcome` and `Completion` steps auto-advance after a short delay.
+- __Proceed gating__: The Continue button enables only after a step calls `onComplete()`.
+- __Resilience__: Initialization errors display a helpful message and proceed with defaults.
+- __Data__: Completed step IDs deduplicated in `onboardingData.completedSteps`.
+
+### Component Interaction
+
+```mermaid
+sequenceDiagram
+    participant UI as OnboardingFlow.tsx
+    participant Pay as paymentService
+    participant Loc as localizationService
+    participant Steps as Step Components
+    
+    UI->>Pay: detectUserRegion() (with 3.5s timeout)
+    alt region detected
+      Pay-->>UI: regionCode
+    else timeout/error
+      UI-->>UI: fallback to "US"
+    end
+    UI->>Loc: detectBrowserLocale() + setLocale()
+    UI->>Pay: getOnboardingSteps(region)
+    Pay-->>UI: steps[]
+    UI->>Steps: render CurrentStep with onComplete()
+    Steps-->>UI: onComplete(stepData)
+    UI-->>UI: merge data, enable Continue, maybe auto-advance
+```
+
+## ⚙️ Developer Workflows
+
+### CI/CD (Conceptual)
+
+```mermaid
+flowchart LR
+    A[Commit/PR] --> B[Lint + Typecheck + Tests]
+    B -->|pass| C[Build Frontend]
+    C -->|tag| D[Deploy Preview]
+    D --> E[QA/Smoke]
+    E -->|approve| F[Promote to Prod]
+    B -->|fail| G[Report Status Checks]
+```
+
+### Contract Release Workflow
+
+```mermaid
+flowchart TD
+    A[Design/Spec] --> B[Implement Solidity]
+    B --> C[Unit Tests]
+    C --> D[Audit/Review]
+    D --> E[Deploy Testnet]
+    E --> F[Integration Tests]
+    F -->|green| G[Mainnet Deploy]
+    F -->|red| B
+```
+
+## 🧩 Problems Solved (Engineering Notes)
+
+These notes capture real issues encountered and how we solved them for future maintainability.
+
+### 1) Onboarding occasionally hung at start
+- __Symptoms__: Modal showed nothing or remained stuck before first step.
+- __Root cause__: Region detection could stall or fail, and the UI returned `null` during init.
+- __Fix__: In `OnboardingFlow.tsx`
+    - Added a 3.5s timeout wrapper around `paymentService.detectUserRegion()` with a default fallback to `US`.
+    - Rendered an in-modal `Spinner` + helpful message instead of returning `null` until steps are ready.
+    - Set safe defaults and error message on initialization failure.
+    - Reset state on modal close to avoid stale state when reopening.
+    - Added targeted debug logs to trace step progress.
+    - Deduplicated `completedSteps` to avoid repeated entries.
+- __Outcome__: No silent hangs; onboarding reliably progresses with clear UX feedback.
+
+### 2) Proceed button didn’t enable on some steps
+- __Cause__: Step didn’t signal completion or completion array had duplicates masking state.
+- __Fix__: Ensured every step calls `onComplete()` with expected data. Deduplicated `completedSteps` and set `canProceed` on completion.
+- __Outcome__: Consistent gating and smooth navigation.
+
+### 3) Region change didn’t always allow moving forward
+- __Cause__: After region update, `canProceed` wasn’t set when on `region_selection`.
+- __Fix__: Explicitly set `canProceed(true)` on region change if current step is `region_selection`.
+- __Outcome__: Users can continue immediately after choosing a region.
+
+## 📊 Additional Diagrams
+
+### High-Level Architecture
+
+```mermaid
+graph TD
+    UI[Next.js + Chakra UI] --> SDK[OmniFlow SDK]
+    SDK --> API[Services: payments, localization, kyc]
+    SDK --> Chain[Web3 Providers]
+    API -->|Region/KYC| UI
+    Chain --> Contracts[Solidity Contracts]
+    Contracts <-->|Bridge| CrossChain[Cross-Chain Infra]
+```
+
+---
+
 **Built with ❤️ by the OmniFlow Team**
