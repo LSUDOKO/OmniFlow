@@ -1,6 +1,6 @@
 # OmniFlow - Cross-Chain RWA Marketplace
 
-![OmniFlow Logo](https://via.placeholder.com/800x200/6366f1/ffffff?text=OmniFlow+RWA+Marketplace)
+<img width="702" height="263" alt="Screenshot 2025-08-27 202549" src="https://github.com/user-attachments/assets/9200388a-29fa-47bf-be07-876a3b93226e" />
 
 ## 🌟 Overview
 
@@ -314,25 +314,6 @@ For support and questions:
 - Join our Discord community
 - Email: support@omniflow.io
 
-## 🎯 Roadmap
-
-### Phase 1 (Current)
-- ✅ Core smart contracts
-- ✅ Cross-chain bridge
-- ✅ Basic marketplace
-- ✅ OneChain integration
-
-### Phase 2 (Q1 2024)
-- 🔄 SUI blockchain integration
-- 🔄 Advanced governance features
-- 🔄 Institutional dashboard
-- 🔄 Mobile application
-
-### Phase 3 (Q2 2024)
-- 📋 Additional asset types
-- 📋 DeFi integrations
-- 📋 Yield farming
-- 📋 Insurance protocols
 
 ---
 
