@@ -1,15 +1,15 @@
 "use client";
 
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
-import { ThirdwebProvider } from "@thirdweb-dev/react";
-import { Ethereum, Polygon, BinanceSmartChain } from "@thirdweb-dev/chains";
+import { ThirdwebProvider } from "thirdweb/react";
+import { ethereum, polygon, bsc } from "thirdweb/chains";
+import { defineChain } from "thirdweb/chains";
 
 // OneChain network configurations
-const OneChainTestnet = {
-  chainId: 1001,
+const oneChainTestnet = defineChain({
+  id: 1001,
   name: "OneChain Testnet",
-  chain: "OneChain",
-  rpc: ["https://rpc-testnet.onelabs.cc:443"],
+  rpc: "https://rpc-testnet.onelabs.cc:443",
   nativeCurrency: {
     name: "OneChain Token",
     symbol: "OCT",
@@ -22,13 +22,12 @@ const OneChainTestnet = {
     },
   ],
   testnet: true,
-};
+});
 
-const OneChainMainnet = {
-  chainId: 1000,
+const oneChainMainnet = defineChain({
+  id: 1000,
   name: "OneChain Mainnet",
-  chain: "OneChain",
-  rpc: ["https://rpc.mainnet.onelabs.cc:443"],
+  rpc: "https://rpc.mainnet.onelabs.cc:443",
   nativeCurrency: {
     name: "OneChain Token",
     symbol: "OCT",
@@ -41,7 +40,7 @@ const OneChainMainnet = {
     },
   ],
   testnet: false,
-};
+});
 
 // Custom theme for OmniFlow
 const theme = extendTheme({
@@ -77,27 +76,9 @@ const theme = extendTheme({
   },
 });
 
-const supportedChains = [
-  Ethereum,
-  Polygon,
-  BinanceSmartChain,
-  OneChainTestnet,
-  OneChainMainnet,
-];
-
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <ThirdwebProvider
-      activeChain={OneChainTestnet}
-      supportedChains={supportedChains}
-      clientId={process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID}
-      supportedWallets={[
-        "metamask",
-        "walletConnect",
-        "coinbaseWallet",
-        "injected",
-      ]}
-    >
+    <ThirdwebProvider>
       <ChakraProvider theme={theme}>
         {children}
       </ChakraProvider>

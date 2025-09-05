@@ -33,7 +33,8 @@ import {
   FaShieldAlt,
   FaRocket,
 } from "react-icons/fa";
-import { ConnectWallet } from "@thirdweb-dev/react";
+import { ConnectButton } from "thirdweb/react";
+import { client } from "../lib/thirdweb";
 
 const assetTypes = [
   {
@@ -127,10 +128,9 @@ export default function HomePage() {
           </Text>
           
           <HStack spacing={4}>
-            <ConnectWallet
+            <ConnectButton
+              client={client}
               theme="dark"
-              btnTitle="Connect Wallet"
-              modalTitle="Choose Your Wallet"
             />
             <Button size="lg" variant="outline" colorScheme="purple">
               View Documentation
