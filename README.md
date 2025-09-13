@@ -1,31 +1,32 @@
-# SolanaFlow - Cross-Chain RWA Marketplace
+# OmniFlow - Universal Cross-Chain RWA + Identity Router
 
-<img width="702" height="263" alt="Screenshot 2025-08-27 202549" src="https://github.com/user-attachments/assets/9200388a-29fa-47bf-be07-876a3b93226e" />
+<img width="702" height="263" alt="OmniFlow Platform" src="https://github.com/user-attachments/assets/9200388a-29fa-47bf-be07-876a3b93226e" />
 
 ## 🌟 Overview
 
-**SolanaFlow** is a production-ready cross-chain marketplace for Real World Assets (RWA) that enables users to tokenize, buy, sell, and fractionalize real-world assets across multiple blockchain networks. Built with institutional-grade security, compliance features, and a stunning glassmorphism UI that provides a royal, professional experience.
+**OmniFlow** is a production-ready universal cross-chain platform for Real World Assets (RWA) tokenization with integrated decentralized identity, AI-powered due diligence, gamification, and comprehensive compliance. Built for the MetaMask hackathon, qualifying for both Cross-Chain Interoperability and RWA Tokenization tracks. Features institutional-grade security, regulatory compliance, and an engaging gamified experience that transforms RWA investing into an addictive simulation game.
 
-### ✨ New Features
+### ✨ Core Features
 
-- **🎨 Royal Glassmorphism Design**: Premium UI with glass morphism effects, gold accents, and royal color scheme
-- **📊 Advanced Dashboard**: Comprehensive portfolio management with real-time analytics
-- **🏪 Professional Marketplace**: High-tech asset discovery and trading interface
-- **📈 Market Analytics**: Deep insights into RWA market performance and trends
-- **💼 Portfolio Management**: Detailed asset tracking with yield calculations
-- **🔔 Real-time Notifications**: Live updates on transactions, yields, and market changes
-- **⚡ Quick Actions**: Streamlined workflows for common tasks
-- **🌐 Cross-chain Integration**: Seamless asset management across multiple blockchains
+- **🎮 RWA Tycoon Gamification**: Transform RWA investing into an engaging simulation game with achievements, leaderboards, and virtual portfolio management
+- **🤖 AI-Powered Due Diligence**: OpenAI/Claude integration for comprehensive RWA analysis, risk assessment, and yield projections
+- **🛡️ Comprehensive Compliance**: Production-ready KYC/AML system with 5-level compliance, regional policies, and regulatory framework
+- **🆔 Cross-Chain Identity**: NFT-based identity passport system with DID integration across Ethereum, Solana, and EVM chains
+- **💰 Yield Vault System**: Aave/Yearn-style yield farming with aYield tokens, compound interest, and automated rewards
+- **📊 Real-Time Analytics**: Professional market dashboard with TVL tracking, volume analytics, and performance metrics
+- **🌉 Cross-Chain Bridge**: Wormhole integration for seamless asset transfers between Solana and EVM chains
+- **🎨 Royal Glassmorphism UI**: Premium interface with glass morphism effects and professional UX design
 
-### 🎯 Key Features
+### 🎯 Platform Capabilities
 
-- **Cross-Chain Compatibility**: Ethereum, Polygon, BSC, OneChain, and SUI support
-- **Multi-Asset Support**: Real estate, carbon credits, precious metals, commodities, and more
-- **Fractional Ownership**: Split high-value assets into affordable fractions
-- **Advanced Marketplace**: Fixed price sales, auctions, and fractional trading
-- **Compliance Ready**: Built-in KYC/AML compliance and regulatory frameworks
-- **Upgradeable Contracts**: UUPS proxy pattern for future enhancements
-- **Multi-Wallet Support**: MetaMask, WalletConnect, OneChain wallet integration
+- **🌐 Universal Cross-Chain**: Ethereum, Polygon, BSC, Arbitrum, Optimism, Solana with Wormhole bridge
+- **🏆 Gamified Experience**: 50+ achievements, player progression, daily rewards, leaderboards, and virtual asset upgrades
+- **🔍 AI Due Diligence**: Institutional-grade analysis with risk scoring, ESG evaluation, and market comparables
+- **📋 Regulatory Compliance**: US/EU/APAC regional policies, automated AML monitoring, and compliance scoring
+- **🎫 Digital Identity**: ERC-721 + ERC-725 identity NFTs with verifiable credentials and cross-chain linking
+- **💎 Yield Generation**: Fractional RWA tokens with automated yield distribution and compound rewards
+- **📈 Professional Analytics**: Real-time market data, portfolio tracking, and performance insights
+- **🔐 Enterprise Security**: UUPS upgradeable contracts, multi-sig governance, and emergency pause mechanisms
 
 ## 🏗️ Architecture
 
@@ -33,44 +34,100 @@
 
 ```
 contracts/
-├── core/
-│   └── RWARegistry.sol          # Central asset registry
+├── ai/
+│   └── AIRiskEngine.sol         # AI-powered risk assessment
+├── authenticity/
+│   └── DocumentVerification.sol # Asset authenticity verification
+├── bridge/
+│   ├── CrossChainBridge.sol     # Wormhole cross-chain transfers
+│   ├── BridgeFeeOptimizer.sol   # Dynamic fee optimization
+│   └── CrossChainEventListener.sol # Bridge event handling
+├── certificates/
+│   └── DynamicRWACertificate.sol # Dynamic NFT certificates
+├── compliance/
+│   ├── ComplianceManager.sol    # KYC/AML compliance engine
+│   ├── IComplianceManager.sol   # Compliance interface
+│   └── ComplianceEnabled.sol    # Compliance mixin
+├── governance/
+│   ├── GovernanceToken.sol      # DAO governance token
+│   └── RWAGovernance.sol        # Governance proposals
+├── identity/
+│   ├── IdentityPassportNFT.sol  # Cross-chain identity NFTs
+│   └── IIdentityPassport.sol    # Identity interface
+├── insurance/
+│   └── RWAInsurance.sol         # Asset insurance coverage
+├── marketplace/
+│   ├── RWAMarketplace.sol       # Advanced trading marketplace
+│   └── FractionalMarketplace.sol # Fractional trading
+├── oracles/
+│   └── RWAPriceOracle.sol       # Chainlink price feeds
+├── staking/
+│   └── RWAStaking.sol           # Staking rewards
 ├── tokens/
 │   ├── RWAToken.sol             # ERC721 RWA NFTs
-│   └── RWAFractional.sol        # ERC20 fractional tokens
-├── bridge/
-│   └── CrossChainBridge.sol     # Cross-chain asset transfers
-├── marketplace/
-│   └── RWAMarketplace.sol       # Trading marketplace
-└── interfaces/
+│   ├── RWAFractional.sol        # ERC20 fractional tokens
+│   └── aYieldToken.sol          # Yield-bearing vault tokens
+├── vault/
+│   ├── RWAYieldVault.sol        # Yield farming vault
+│   └── IRWAYieldVault.sol       # Vault interface
+└── core/
+    ├── RWARegistry.sol          # Central asset registry
     └── IRWARegistry.sol         # Registry interface
 ```
 
-### Frontend
+### Frontend Architecture
 
 ```
 src/
 ├── app/
-│   ├── page.tsx                 # Royal glassmorphism landing page
-│   ├── dashboard/
-│   │   └── page.tsx             # Comprehensive dashboard
-│   ├── marketplace/
-│   │   └── page.tsx             # Advanced marketplace interface
-│   ├── portfolio/
-│   │   └── page.tsx             # Portfolio management
-│   ├── analytics/
-│   │   └── page.tsx             # Market analytics dashboard
-│   ├── layout.tsx               # Root layout with royal theme
-│   ├── providers.tsx            # Web3 providers (thirdweb v5)
-│   └── globals.css              # Royal glassmorphism styles
+│   ├── page.tsx                 # Landing page with gamification preview
+│   ├── ai-matching/             # AI-powered asset matching
+│   ├── analytics/               # Real-time market analytics
+│   ├── authenticity/            # Asset verification dashboard
+│   ├── bridge/                  # Cross-chain bridge interface
+│   ├── compliance/              # Compliance center
+│   ├── dashboard/               # Main user dashboard
+│   ├── governance/              # DAO governance interface
+│   ├── identity/                # Identity passport management
+│   ├── marketplace/             # Advanced marketplace
+│   ├── portfolio/               # Portfolio management
+│   ├── quick-bridge/            # Quick bridge interface
+│   ├── rwa-tycoon/              # Gamification dashboard
+│   ├── staking/                 # Staking interface
+│   └── yield-vault/             # Yield farming dashboard
 ├── components/
-│   └── ui/
-│       └── glass-card.tsx       # Glassmorphism card component
-├── lib/
-│   ├── thirdweb.ts             # Thirdweb v5 configuration
-│   └── utils.ts                # Utility functions
-└── config/
-    └── contracts-*.json         # Contract configurations
+│   ├── ai/                      # AI due diligence components
+│   ├── analytics/               # Analytics visualizations
+│   ├── bridge/                  # Bridge UI components
+│   ├── compliance/              # Compliance widgets
+│   ├── gamification/            # RWA Tycoon game components
+│   ├── identity/                # Identity passport UI
+│   ├── marketplace/             # Marketplace components
+│   ├── onboarding/              # User onboarding flow
+│   ├── portfolio/               # Portfolio management
+│   └── ui/                      # Reusable UI components
+├── contexts/
+│   ├── WalletContext.tsx        # Multi-chain wallet management
+│   └── GameContext.tsx          # Gamification state
+├── hooks/
+│   ├── useAIDueDiligence.ts     # AI analysis hook
+│   ├── useBridge.ts             # Cross-chain bridge
+│   ├── useCompliance.ts         # Compliance management
+│   ├── useIdentityPassport.ts   # Identity system
+│   ├── useRWATycoon.ts          # Gamification engine
+│   └── useYieldVault.ts         # Yield farming
+├── services/
+│   ├── AIDueDiligenceService.ts # AI analysis service
+│   ├── ComplianceService.ts     # Compliance engine
+│   ├── RWATycoonService.ts      # Gamification service
+│   ├── BridgeService.ts         # Cross-chain bridge
+│   └── YieldVaultService.ts     # Yield management
+├── sdk/
+│   ├── index.ts                 # Main SDK export
+│   └── managers/                # SDK managers
+└── api/
+    ├── graphql/                 # GraphQL API
+    └── rest/                    # REST endpoints
 ```
 
 ## 🚀 Quick Start
@@ -79,14 +136,16 @@ src/
 
 - Node.js 18+
 - npm or yarn
-- MetaMask or compatible wallet
+- MetaMask wallet
+- OpenAI/Claude API keys (for AI features)
+- Infura/Alchemy RPC endpoints
 
 ### Installation
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/omniflow/rwa-marketplace.git
-cd rwa-marketplace
+git clone https://github.com/omniflow/omniflow-platform.git
+cd omniflow-platform
 ```
 
 2. **Install dependencies**
@@ -97,54 +156,103 @@ npm install
 3. **Set up environment variables**
 ```bash
 cp .env.example .env
-# Edit .env with your configuration
+# Configure the following:
+# - OPENAI_API_KEY (for AI due diligence)
+# - CLAUDE_API_KEY (backup AI provider)
+# - INFURA_API_KEY (RPC endpoints)
+# - PRIVATE_KEY (deployment wallet)
+# - NEXT_PUBLIC_THIRDWEB_CLIENT_ID
 ```
 
-4. **Compile contracts**
+4. **Deploy smart contracts**
 ```bash
+# Compile all contracts
 npm run compile
-```
 
-5. **Deploy contracts**
-```bash
-# Deploy to OneChain Testnet
-npm run deploy:onechain
-
-# Deploy to other networks
+# Deploy core infrastructure
 npm run deploy:ethereum
 npm run deploy:polygon
 npm run deploy:bsc
+
+# Deploy Solana program
+cd programs/omniflow-rwa
+anchor build
+anchor deploy
 ```
 
-6. **Start the frontend**
+5. **Initialize services**
+```bash
+# Set up compliance system
+node scripts/setup-compliance.js
+
+# Initialize gamification
+node scripts/setup-gamification.js
+
+# Configure AI services
+node scripts/setup-ai.js
+```
+
+6. **Start the platform**
 ```bash
 npm run dev
 ```
 
-Visit `http://localhost:3000` to access the application.
+Visit `http://localhost:3000` to access OmniFlow.
 
-## 🎨 UI Features
+### Demo Features
 
-### Royal Glassmorphism Design
-- **Glass Morphism Effects**: Backdrop blur with translucent glass cards
-- **Royal Color Palette**: Deep royal blues, elegant golds, and premium gradients
-- **Professional Typography**: Playfair Display for headings, Inter for body text
-- **Smooth Animations**: Framer Motion powered transitions and micro-interactions
-- **Responsive Design**: Mobile-first approach with adaptive layouts
+- **RWA Tycoon Game**: Complete onboarding to unlock the gamification dashboard
+- **AI Due Diligence**: Analyze any RWA asset for comprehensive risk assessment
+- **Cross-Chain Bridge**: Transfer assets between Ethereum and Solana
+- **Yield Farming**: Deposit RWA tokens to earn automated yields
+- **Identity Passport**: Create cross-chain identity with verifiable credentials
 
-### Advanced Components
-- **Interactive Asset Cards**: Hover effects, real-time data, and quick actions
-- **Dynamic Charts**: Portfolio performance and market analytics visualization
-- **Smart Notifications**: Real-time updates with categorized alerts
-- **Quick Action Panels**: Streamlined workflows for common tasks
-- **Cross-chain Indicators**: Visual chain identification and status
+## 🎮 RWA Tycoon Gamification
 
-### User Experience
-- **Intuitive Navigation**: Tab-based interfaces with smooth transitions
-- **Real-time Updates**: Live data refresh with loading states
-- **Accessibility**: WCAG compliant with keyboard navigation
-- **Performance**: Optimized animations and lazy loading
-- **Dark Theme**: Professional dark mode with royal accents
+### Core Game Mechanics
+- **Player Progression**: Level system with exponential XP curve and bonus rewards
+- **Virtual Portfolio**: Mirror real RWA holdings with game mechanics and upgrades
+- **Governance Points**: Primary currency earned through investments and daily activity
+- **Achievement System**: 50+ unlockable achievements across Investment, Portfolio, Social, and Milestone categories
+- **Daily Rewards**: Automated daily return processing with streak bonuses up to 7 days
+- **Reality Bonus**: 50% bonus rewards for players who own actual RWA tokens
+
+### Competitive Features
+- **Leaderboards**: Portfolio Value, Returns, Governance Points, and Diversification rankings
+- **Player Titles**: 5 rarity tiers (Common → Mythic) with unlock requirements
+- **Asset Upgrades**: Yield boosts, risk reduction, and synergy unlocks using governance points
+- **Market Events**: Dynamic events affecting yields (Bull Run, Market Crash, Regulatory Changes)
+- **Portfolio Synergies**: Asset combination bonuses (Real Estate + Precious Metals = 10% stability)
+
+### Addictive Design Elements
+- **Achievement Notifications**: Celebration animations and toast notifications
+- **Progress Visualization**: Level progression bars and achievement completion tracking
+- **Rarity Collection**: Color-coded rarity system creating collection desire
+- **Real-time Competition**: Live leaderboard updates driving competitive engagement
+- **Streak Mechanics**: Daily login rewards with increasing multipliers
+
+## 🤖 AI-Powered Due Diligence
+
+### Analysis Capabilities
+- **Risk Assessment**: 5-level scoring (VERY_LOW to VERY_HIGH) with detailed factors and mitigations
+- **Yield Projection**: AI-calculated APY suggestions with confidence scores and market comparables
+- **ESG Scoring**: Environmental, Social, Governance analysis (0-100 scale) with improvement recommendations
+- **KYC Risk Profile**: Compliance level determination with verification step recommendations
+- **Jurisdiction Analysis**: Country risk assessment, regulations, compliance requirements, tax implications
+
+### AI Integration
+- **Multi-Provider Support**: OpenAI GPT-4 Turbo and Claude Sonnet with intelligent fallback
+- **Specialized Prompts**: RWA-specific analysis prompts for different asset classes
+- **Performance Optimization**: 24-hour intelligent caching with automatic cleanup
+- **Batch Processing**: Multiple asset analysis with concurrency control
+- **Data Validation**: Comprehensive JSON response validation and error handling
+
+### Asset Coverage
+- **Real Estate**: Occupancy rates, cap rates, NOI, market cycles analysis
+- **Precious Metals**: Volatility assessment, storage verification, purity analysis
+- **Carbon Credits**: Environmental impact, verification standards, regulatory compliance
+- **Art & Collectibles**: Provenance verification, market liquidity, subjective valuation risks
+- **Commodities**: Price volatility, supply chain risks, storage considerations
 
 ## 🔧 Configuration
 
@@ -200,33 +308,102 @@ NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=your_walletconnect_project_id
 - Industrial materials
 - Energy resources
 
-## 🔐 Security Features
+## 🛡️ Comprehensive Compliance System
+
+### Compliance Architecture
+- **5-Level System**: NONE, BASIC, ENHANCED, INSTITUTIONAL, RESTRICTED
+- **Regional Policies**: US, EU, Asia Pacific, Restricted, Sanctioned with custom rules
+- **Risk Assessment**: LOW, MEDIUM, HIGH, CRITICAL with automatic scoring
+- **KYC Integration**: Identity Passport NFT system with verifiable credentials
+- **Blacklist/Whitelist**: Management with reason tracking and audit trails
+
+### Regulatory Compliance
+- **US Regulations**: Enhanced KYC, $10M transaction limits, additional verification requirements
+- **EU Regulations**: Basic KYC, $5M transaction limits, GDPR compliance
+- **Sanctioned Regions**: Complete restriction with zero transaction limits
+- **Geographic Enforcement**: IP detection and automatic policy application
+- **Compliance Expiry**: Automatic renewal alerts and re-verification workflows
+
+### AML Monitoring
+- **Suspicious Activity Detection**: Automated pattern recognition and flagging
+- **Transaction Monitoring**: Real-time analysis of all platform transactions
+- **Risk Scoring**: Dynamic user risk assessment based on activity patterns
+- **Compliance Reporting**: Automated generation of regulatory reports
+- **Audit Trail**: Complete immutable record of all compliance actions
+
+## 🔐 Enterprise Security
 
 ### Smart Contract Security
-- **Upgradeable Contracts**: UUPS proxy pattern
-- **Access Control**: Role-based permissions
-- **Reentrancy Protection**: OpenZeppelin guards
-- **Pause Mechanism**: Emergency stop functionality
+- **UUPS Upgradeable**: Future-proof contract architecture with admin controls
+- **Multi-Signature**: Governance actions require multiple authorized signatures
+- **Role-Based Access**: Granular permissions with OpenZeppelin AccessControl
+- **Emergency Pause**: Circuit breaker functionality for critical situations
+- **Reentrancy Protection**: Comprehensive guards on all state-changing functions
 
-### Compliance Features
-- **KYC Integration**: User verification system
-- **AML Compliance**: Transaction monitoring
-- **Regulatory Framework**: Configurable compliance levels
-- **Audit Trail**: Complete transaction history
+### Identity & Authentication
+- **Cross-Chain Identity**: ERC-721 + ERC-725 identity NFTs with DID integration
+- **Verifiable Credentials**: W3C standard credentials with cryptographic proofs
+- **Multi-Wallet Linking**: Connect multiple addresses with signature verification
+- **EIP-4361 Compatibility**: Sign-In with Ethereum standard implementation
+- **Cross-Chain Sync**: Automatic identity synchronization via Wormhole/LayerZero
 
-## 🌉 Cross-Chain Bridge
+## 💰 Advanced Yield Vault System
 
-### Supported Operations
-- NFT transfers between chains
-- Fractional token bridging
-- Asset metadata synchronization
-- Cross-chain marketplace listings
+### Vault Architecture
+- **aYield Tokens**: ERC20 share tokens representing proportional vault ownership
+- **Aave/Yearn Patterns**: Industry-standard share-based accounting system
+- **Price Appreciation**: Share value increases over time through yield accumulation
+- **Compound Interest**: Automatic reinvestment of yields for exponential growth
+- **Multi-Asset Vaults**: Separate vaults for different RWA asset classes
+
+### Yield Generation
+- **Demo APY**: 5% annual percentage yield for demonstration purposes
+- **Real-Time Calculation**: Yield computed based on deposit time and current rates
+- **Daily Processing**: Automated daily yield distribution with streak bonuses
+- **Performance Fees**: 10% performance, 2% management, 0.5% withdrawal fees
+- **Gas Optimization**: Batch operations for efficient yield distribution
+
+### Security & Controls
+- **OpenZeppelin Security**: ReentrancyGuard, Pausable, Ownable, SafeERC20
+- **Emergency Shutdown**: Circuit breaker with emergency withdrawal capabilities
+- **Upgrade Mechanism**: UUPS proxy pattern for future enhancements
+- **Access Controls**: Role-based permissions for administrative functions
+- **Audit Trail**: Complete transaction history and yield distribution logs
+
+### Integration Features
+- **Gamification Sync**: Vault yields contribute to RWA Tycoon progression and rewards
+- **Compliance Integration**: All vault operations subject to compliance verification
+- **Cross-Chain Deployment**: Vaults available on all supported networks
+- **API Access**: RESTful and GraphQL endpoints for external integrations
+- **Real-Time Analytics**: Live performance tracking and portfolio insights
+
+## 🌉 Universal Cross-Chain Bridge
+
+### Supported Networks
+- **EVM Chains**: Ethereum, Polygon, BSC, Arbitrum, Optimism
+- **Solana**: Native SPL token and NFT support
+- **Bridge Protocols**: Wormhole for Solana ↔ EVM, Circle CCTP for EVM ↔ EVM
+- **Asset Types**: RWA NFTs, fractional tokens, native assets, and stablecoins
+
+### Bridge Features
+- **Quick Bridge Interface**: User-friendly chain and token selection
+- **Real-Time Status**: 4-step process tracking with transaction hashes
+- **Fee Optimization**: Dynamic fee calculation and route optimization
+- **Bridge History**: Complete transaction history with retry functionality
+- **Mobile Responsive**: Elegant design with Framer Motion animations
 
 ### Bridge Process
-1. Lock asset on source chain
-2. Generate bridge transaction
-3. Relayer validates and processes
-4. Mint equivalent asset on target chain
+1. **Approve Token**: User approves token spending on source chain
+2. **Lock on Source**: Asset locked in bridge contract with event emission
+3. **Validate Transfer**: Bridge validators confirm and sign transaction
+4. **Mint on Destination**: Equivalent asset minted on target chain
+
+### Technical Implementation
+- **Wormhole Integration**: Core messaging for Ethereum ↔ Solana transfers
+- **CCTP Support**: Circle's Cross-Chain Transfer Protocol for stablecoins
+- **Contract Addresses**: Deployed on all supported networks with verification
+- **Event Monitoring**: Real-time bridge status updates via WebSocket connections
+- **Error Handling**: Comprehensive retry logic and user feedback systems
 
 ## 🏪 Marketplace Features
 
