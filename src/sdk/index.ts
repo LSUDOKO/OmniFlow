@@ -1,7 +1,7 @@
 /**
- * OmniFlow RWA SDK - Cross-Chain Real World Asset Integration
+ * SolanaFlow RWA SDK - Cross-Chain Real World Asset Integration
  * 
- * A comprehensive SDK for integrating with the OmniFlow RWA marketplace
+ * A comprehensive SDK for integrating with the SolanaFlow RWA marketplace
  * across multiple blockchain networks with OneChain-first architecture.
  */
 

@@ -1,6 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { formatChartDate } from "@/lib/date-utils";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+} from 'recharts';
 import {
   Box,
   VStack,
@@ -8,23 +21,12 @@ import {
   Text,
   Button,
   ButtonGroup,
-  useColorModeValue,
-  Spinner,
   Icon,
-  Tooltip,
-} from "@chakra-ui/react";
-import {
-  LineChart,
-  Line,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
-  ResponsiveContainer,
+  Tooltip as ChakraTooltip,
+  Spinner,
   Legend,
-} from "recharts";
+  useColorModeValue,
+} from "@chakra-ui/react";
 import { FaInfoCircle } from "react-icons/fa";
 import { HistoricalData } from "../../services/portfolioService";
 
@@ -82,13 +84,8 @@ export default function PortfolioChart({ data, isLoading = false }: PortfolioCha
     return `${value.toFixed(2)}%`;
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric',
-      year: timeRange === 'ALL' ? 'numeric' : undefined
-    });
+  const formatDateForChart = (dateString: string) => {
+    return formatChartDate(dateString, timeRange);
   };
 
   const CustomTooltip = ({ active, payload, label }: any) => {

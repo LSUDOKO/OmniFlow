@@ -220,7 +220,7 @@ class LocalizationService {
         processing: 'Processing'
       },
       onboarding: {
-        title: 'Welcome to OmniFlow',
+        title: 'Welcome to SolanaFlow',
         subtitle: 'Your gateway to fractional Real World Asset investments',
         getStarted: 'Get Started',
         selectRegion: 'Select Your Region',
@@ -235,7 +235,7 @@ class LocalizationService {
         identityDescription: 'Upload a government-issued ID for compliance',
         paymentSetup: 'Setup Payment Method',
         paymentDescription: 'Add your preferred payment method for easy investing',
-        completion: 'Welcome to OmniFlow!',
+        completion: 'Welcome to SolanaFlow!',
         completionDescription: 'Your account is ready for RWA investments',
         estimatedTime: 'Estimated time: {{time}} minutes',
         step: 'Step {{current}} of {{total}}',
@@ -433,7 +433,7 @@ class LocalizationService {
         processing: 'Procesando'
       },
       onboarding: {
-        title: 'Bienvenido a OmniFlow',
+        title: 'Bienvenido a SolanaFlow',
         subtitle: 'Tu puerta de entrada a inversiones fraccionarias en activos del mundo real',
         getStarted: 'Comenzar',
         selectRegion: 'Selecciona tu región',
@@ -481,7 +481,7 @@ class LocalizationService {
         processing: 'Processando'
       },
       onboarding: {
-        title: 'Bem-vindo ao OmniFlow',
+        title: 'Bem-vindo ao SolanaFlow',
         subtitle: 'Sua porta de entrada para investimentos fracionários em ativos do mundo real',
         getStarted: 'Começar',
         selectRegion: 'Selecione sua região',
@@ -529,7 +529,7 @@ class LocalizationService {
         processing: 'प्रसंस्करण'
       },
       onboarding: {
-        title: 'OmniFlow में आपका स्वागत है',
+        title: 'SolanaFlow में आपका स्वागत है',
         subtitle: 'वास्तविक संपत्ति के आंशिक निवेश का आपका प्रवेश द्वार',
         getStarted: 'शुरू करें',
         selectRegion: 'अपना क्षेत्र चुनें',

@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 
 async function main() {
-  console.log("🚀 Starting OmniFlow RWA Marketplace deployment...");
+  console.log("🚀 Starting SolanaFlow RWA Marketplace deployment...");
   
   const [deployer] = await ethers.getSigners();
   const network = await ethers.provider.getNetwork();
@@ -35,7 +35,7 @@ async function main() {
     const rwaToken = await upgrades.deployProxy(
       RWAToken,
       [
-        "OmniFlow RWA Token",
+        "SolanaFlow RWA Token",
         "ORWA",
         registryAddress,
         deployer.address,
@@ -196,7 +196,7 @@ async function main() {
     
     console.log("📄 Frontend config saved to:", configFile);
 
-    console.log("\n🎉 OmniFlow RWA Marketplace deployment completed successfully!");
+    console.log("\n🎉 SolanaFlow RWA Marketplace deployment completed successfully!");
     console.log("\n📋 Contract Addresses:");
     Object.entries(deployedContracts).forEach(([name, address]) => {
       console.log(`- ${name}: ${address}`);

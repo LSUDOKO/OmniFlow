@@ -1,10 +1,21 @@
-# OmniFlow - Cross-Chain RWA Marketplace
+# SolanaFlow - Cross-Chain RWA Marketplace
 
 <img width="702" height="263" alt="Screenshot 2025-08-27 202549" src="https://github.com/user-attachments/assets/9200388a-29fa-47bf-be07-876a3b93226e" />
 
 ## 🌟 Overview
 
-**OmniFlow** is a production-ready cross-chain marketplace for Real World Assets (RWA) that enables users to tokenize, buy, sell, and fractionalize real-world assets across multiple blockchain networks. Built with institutional-grade security and compliance features.
+**SolanaFlow** is a production-ready cross-chain marketplace for Real World Assets (RWA) that enables users to tokenize, buy, sell, and fractionalize real-world assets across multiple blockchain networks. Built with institutional-grade security, compliance features, and a stunning glassmorphism UI that provides a royal, professional experience.
+
+### ✨ New Features
+
+- **🎨 Royal Glassmorphism Design**: Premium UI with glass morphism effects, gold accents, and royal color scheme
+- **📊 Advanced Dashboard**: Comprehensive portfolio management with real-time analytics
+- **🏪 Professional Marketplace**: High-tech asset discovery and trading interface
+- **📈 Market Analytics**: Deep insights into RWA market performance and trends
+- **💼 Portfolio Management**: Detailed asset tracking with yield calculations
+- **🔔 Real-time Notifications**: Live updates on transactions, yields, and market changes
+- **⚡ Quick Actions**: Streamlined workflows for common tasks
+- **🌐 Cross-chain Integration**: Seamless asset management across multiple blockchains
 
 ### 🎯 Key Features
 
@@ -40,11 +51,24 @@ contracts/
 ```
 src/
 ├── app/
-│   ├── page.tsx                 # Landing page
+│   ├── page.tsx                 # Royal glassmorphism landing page
+│   ├── dashboard/
+│   │   └── page.tsx             # Comprehensive dashboard
 │   ├── marketplace/
-│   │   └── page.tsx             # Marketplace interface
-│   ├── layout.tsx               # Root layout
-│   └── providers.tsx            # Web3 providers
+│   │   └── page.tsx             # Advanced marketplace interface
+│   ├── portfolio/
+│   │   └── page.tsx             # Portfolio management
+│   ├── analytics/
+│   │   └── page.tsx             # Market analytics dashboard
+│   ├── layout.tsx               # Root layout with royal theme
+│   ├── providers.tsx            # Web3 providers (thirdweb v5)
+│   └── globals.css              # Royal glassmorphism styles
+├── components/
+│   └── ui/
+│       └── glass-card.tsx       # Glassmorphism card component
+├── lib/
+│   ├── thirdweb.ts             # Thirdweb v5 configuration
+│   └── utils.ts                # Utility functions
 └── config/
     └── contracts-*.json         # Contract configurations
 ```
@@ -98,6 +122,29 @@ npm run dev
 ```
 
 Visit `http://localhost:3000` to access the application.
+
+## 🎨 UI Features
+
+### Royal Glassmorphism Design
+- **Glass Morphism Effects**: Backdrop blur with translucent glass cards
+- **Royal Color Palette**: Deep royal blues, elegant golds, and premium gradients
+- **Professional Typography**: Playfair Display for headings, Inter for body text
+- **Smooth Animations**: Framer Motion powered transitions and micro-interactions
+- **Responsive Design**: Mobile-first approach with adaptive layouts
+
+### Advanced Components
+- **Interactive Asset Cards**: Hover effects, real-time data, and quick actions
+- **Dynamic Charts**: Portfolio performance and market analytics visualization
+- **Smart Notifications**: Real-time updates with categorized alerts
+- **Quick Action Panels**: Streamlined workflows for common tasks
+- **Cross-chain Indicators**: Visual chain identification and status
+
+### User Experience
+- **Intuitive Navigation**: Tab-based interfaces with smooth transitions
+- **Real-time Updates**: Live data refresh with loading states
+- **Accessibility**: WCAG compliant with keyboard navigation
+- **Performance**: Optimized animations and lazy loading
+- **Dark Theme**: Professional dark mode with royal accents
 
 ## 🔧 Configuration
 
@@ -435,7 +482,7 @@ These notes capture real issues encountered and how we solved them for future ma
 
 ```mermaid
 graph TD
-    UI[Next.js + Chakra UI] --> SDK[OmniFlow SDK]
+    UI[Next.js + Chakra UI] --> SDK[SolanaFlow SDK]
     SDK --> API[Services: payments, localization, kyc]
     SDK --> Chain[Web3 Providers]
     API -->|Region/KYC| UI
@@ -445,4 +492,4 @@ graph TD
 
 ---
 
-**Built with ❤️ by the OmniFlow Team**
+**Built with ❤️ by the SolanaFlow Team**

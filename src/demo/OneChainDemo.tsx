@@ -32,7 +32,7 @@ import {
   Icon,
 } from '@chakra-ui/react';
 import { CheckCircleIcon, ExternalLinkIcon, CopyIcon } from '@chakra-ui/icons';
-import { OmniFlowSDK } from '../sdk';
+import { SolanaFlowSDK } from '../sdk';
 import { SDKConfig } from '../sdk/core/types';
 
 interface DemoStats {
@@ -52,17 +52,17 @@ interface DemoStep {
 
 /**
  * OneChain-First Deployment Demo Component
- * Showcases OmniFlow SDK capabilities for hackathon judges
+ * Showcases SolanaFlow SDK capabilities for hackathon judges
  */
 export const OneChainDemo: React.FC = () => {
-  const [sdk, setSDK] = useState<OmniFlowSDK | null>(null);
+  const [sdk, setSDK] = useState<SolanaFlowSDK | null>(null);
   const [isInitializing, setIsInitializing] = useState(false);
   const [isRunningDemo, setIsRunningDemo] = useState(false);
   const [demoStats, setDemoStats] = useState<DemoStats | null>(null);
   const [demoSteps, setDemoSteps] = useState<DemoStep[]>([
     {
       id: 'init-sdk',
-      title: 'Initialize OmniFlow SDK',
+      title: 'Initialize SolanaFlow SDK',
       description: 'Connect to OneChain testnet and initialize providers',
       status: 'pending',
     },
@@ -122,7 +122,7 @@ export const OneChainDemo: React.FC = () => {
         },
       };
 
-      const sdkInstance = new OmniFlowSDK(config);
+      const sdkInstance = new SolanaFlowSDK(config);
       await sdkInstance.initialize();
       setSDK(sdkInstance);
 
@@ -220,7 +220,7 @@ export const OneChainDemo: React.FC = () => {
         {/* Header */}
         <Box textAlign="center">
           <Heading size="xl" mb={4}>
-            🚀 OmniFlow OneChain Demo
+            🚀 SolanaFlow OneChain Demo
           </Heading>
           <Text fontSize="lg" color="gray.600">
             Complete RWA Marketplace SDK demonstration for hackathon judges
@@ -558,7 +558,7 @@ export const OneChainDemo: React.FC = () => {
         {/* Footer */}
         <Box textAlign="center" py={8}>
           <Text color="gray.600">
-            🏆 Built for hackathon judges to showcase OmniFlow's comprehensive RWA marketplace capabilities
+            🏆 Built for hackathon judges to showcase SolanaFlow's comprehensive RWA marketplace capabilities
           </Text>
           <Text fontSize="sm" color="gray.500" mt={2}>
             OneChain-first • Cross-chain ready • API-first architecture

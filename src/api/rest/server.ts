@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
-import { OmniFlowSDK } from '../sdk';
+import { SolanaFlowSDK } from '../sdk';
 import { SDKConfig } from '../sdk/core/types';
 
 // Import route handlers
@@ -14,18 +14,18 @@ import defiRoutes from './routes/defi';
 import bridgeRoutes from './routes/bridge';
 
 /**
- * OmniFlow REST API Server
+ * SolanaFlow REST API Server
  * Provides comprehensive REST endpoints for RWA marketplace operations
  */
-export class OmniFlowAPIServer {
+export class SolanaFlowAPIServer {
   private app: express.Application;
-  private sdk: OmniFlowSDK;
+  private sdk: SolanaFlowSDK;
   private port: number;
 
   constructor(config: SDKConfig, port: number = 3001) {
     this.app = express();
     this.port = port;
-    this.sdk = new OmniFlowSDK(config);
+    this.sdk = new SolanaFlowSDK(config);
     
     this.setupMiddleware();
     this.setupSwagger();
@@ -73,11 +73,11 @@ export class OmniFlowAPIServer {
       definition: {
         openapi: '3.0.0',
         info: {
-          title: 'OmniFlow RWA API',
+          title: 'SolanaFlow RWA API',
           version: '1.0.0',
           description: 'Comprehensive REST API for Real-World Asset (RWA) marketplace operations',
           contact: {
-            name: 'OmniFlow Team',
+            name: 'SolanaFlow Team',
             url: 'https://omniflow.io',
             email: 'api@omniflow.io',
           },
@@ -243,7 +243,7 @@ export class OmniFlowAPIServer {
     const specs = swaggerJsdoc(swaggerOptions);
     this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(specs, {
       customCss: '.swagger-ui .topbar { display: none }',
-      customSiteTitle: 'OmniFlow RWA API Documentation',
+      customSiteTitle: 'SolanaFlow RWA API Documentation',
     }));
   }
 
@@ -262,7 +262,7 @@ export class OmniFlowAPIServer {
     this.app.get('/api', (req, res) => {
       res.json({
         success: true,
-        name: 'OmniFlow RWA API',
+        name: 'SolanaFlow RWA API',
         version: '1.0.0',
         description: 'Comprehensive REST API for Real-World Asset marketplace operations',
         documentation: '/api/docs',
@@ -381,17 +381,17 @@ export class OmniFlowAPIServer {
     try {
       // Initialize SDK
       await this.sdk.initialize();
-      console.log('OmniFlow SDK initialized successfully');
+      console.log('SolanaFlow SDK initialized successfully');
 
       // Start server
       this.app.listen(this.port, () => {
-        console.log(`🚀 OmniFlow API Server running on port ${this.port}`);
+        console.log(`🚀 SolanaFlow API Server running on port ${this.port}`);
         console.log(`📚 API Documentation: http://localhost:${this.port}/api/docs`);
         console.log(`🔍 Health Check: http://localhost:${this.port}/health`);
         console.log(`🎯 OneChain Demo: http://localhost:${this.port}/api/demo/onechain`);
       });
     } catch (error) {
-      console.error('Failed to start OmniFlow API Server:', error);
+      console.error('Failed to start SolanaFlow API Server:', error);
       process.exit(1);
     }
   }
@@ -402,7 +402,7 @@ export class OmniFlowAPIServer {
   async stop(): Promise<void> {
     try {
       await this.sdk.disconnect();
-      console.log('OmniFlow API Server stopped gracefully');
+      console.log('SolanaFlow API Server stopped gracefully');
     } catch (error) {
       console.error('Error during shutdown:', error);
     }
@@ -418,14 +418,14 @@ export class OmniFlowAPIServer {
   /**
    * Get SDK instance
    */
-  getSDK(): OmniFlowSDK {
+  getSDK(): SolanaFlowSDK {
     return this.sdk;
   }
 }
 
 // Export factory function for easy server creation
-export function createOmniFlowAPIServer(config: SDKConfig, port?: number): OmniFlowAPIServer {
-  return new OmniFlowAPIServer(config, port);
+export function createSolanaFlowAPIServer(config: SDKConfig, port?: number): SolanaFlowAPIServer {
+  return new SolanaFlowAPIServer(config, port);
 }
 
 // CLI entry point
@@ -451,7 +451,7 @@ if (require.main === module) {
     privateKey: process.env.PRIVATE_KEY,
   };
 
-  const server = createOmniFlowAPIServer(config, parseInt(process.env.PORT || '3001'));
+  const server = createSolanaFlowAPIServer(config, parseInt(process.env.PORT || '3001'));
   
   // Handle graceful shutdown
   process.on('SIGINT', async () => {

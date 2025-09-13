@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { OmniFlowSDK } from '../../sdk';
+import { SolanaFlowSDK } from '../../sdk';
 import { MarketplaceFilter, ListingType } from '../../sdk/core/types';
 
 const router = Router();
@@ -40,7 +40,7 @@ const router = Router();
  */
 router.get('/listings', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     
     const filter: MarketplaceFilter = {
       chainId: req.query.chainId as any,
@@ -85,7 +85,7 @@ router.get('/listings', async (req: Request, res: Response) => {
  */
 router.get('/listings/:id', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const listing = await sdk.marketplace.getListing(req.params.id);
     
     if (!listing) {
@@ -142,7 +142,7 @@ router.get('/listings/:id', async (req: Request, res: Response) => {
  */
 router.post('/listings', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const { assetId, price, listingType, duration } = req.body;
     
     if (!assetId || !price || !listingType) {
@@ -204,7 +204,7 @@ router.post('/listings', async (req: Request, res: Response) => {
  */
 router.post('/listings/:id/purchase', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const { buyerAddress } = req.body;
     
     if (!buyerAddress) {
@@ -260,7 +260,7 @@ router.post('/listings/:id/purchase', async (req: Request, res: Response) => {
  */
 router.post('/listings/:id/bid', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const { bidderAddress, bidAmount } = req.body;
     
     if (!bidderAddress || !bidAmount) {
@@ -313,7 +313,7 @@ router.post('/listings/:id/bid', async (req: Request, res: Response) => {
  */
 router.post('/listings/:id/cancel', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const { sellerAddress } = req.body;
     
     if (!sellerAddress) {
@@ -369,7 +369,7 @@ router.post('/listings/:id/cancel', async (req: Request, res: Response) => {
  */
 router.put('/listings/:id/price', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const { newPrice, sellerAddress } = req.body;
     
     if (!newPrice || !sellerAddress) {
@@ -405,7 +405,7 @@ router.put('/listings/:id/price', async (req: Request, res: Response) => {
  */
 router.get('/stats', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const stats = await sdk.marketplace.getMarketplaceStats();
     
     res.json({
@@ -438,7 +438,7 @@ router.get('/stats', async (req: Request, res: Response) => {
  */
 router.get('/trending', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
     const listings = await sdk.marketplace.getTrendingListings(limit);
     
@@ -473,7 +473,7 @@ router.get('/trending', async (req: Request, res: Response) => {
  */
 router.get('/recent-sales', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
     const sales = await sdk.marketplace.getRecentSales(limit);
     
@@ -508,7 +508,7 @@ router.get('/recent-sales', async (req: Request, res: Response) => {
  */
 router.get('/search', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const query = req.query.q as string;
     
     if (!query) {
@@ -562,7 +562,7 @@ router.get('/search', async (req: Request, res: Response) => {
  */
 router.post('/listings/:id/favorite', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const { userAddress } = req.body;
     
     if (!userAddress) {

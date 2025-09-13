@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { OmniFlowSDK } from '../../sdk';
+import { SolanaFlowSDK } from '../../sdk';
 
 const router = Router();
 
@@ -21,7 +21,7 @@ const router = Router();
  */
 router.get('/positions', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const userAddress = req.query.userAddress as string;
     
     const positions = await sdk.defi.getPositions(userAddress);
@@ -70,7 +70,7 @@ router.get('/positions', async (req: Request, res: Response) => {
  */
 router.post('/stake', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const { assetId, poolId, amount, lockupPeriod } = req.body;
     
     if (!assetId || !poolId || !amount) {
@@ -120,7 +120,7 @@ router.post('/stake', async (req: Request, res: Response) => {
  */
 router.post('/unstake/:positionId', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const transaction = await sdk.defi.unstakeAsset(req.params.positionId);
     
     res.json({
@@ -153,7 +153,7 @@ router.post('/unstake/:positionId', async (req: Request, res: Response) => {
  */
 router.post('/claim-rewards/:positionId', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const transaction = await sdk.defi.claimRewards(req.params.positionId);
     
     res.json({
@@ -197,7 +197,7 @@ router.post('/claim-rewards/:positionId', async (req: Request, res: Response) =>
  */
 router.post('/collateral', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const { assetId, protocol, amount } = req.body;
     
     if (!assetId || !protocol || !amount) {
@@ -258,7 +258,7 @@ router.post('/collateral', async (req: Request, res: Response) => {
  */
 router.post('/borrow', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const { positionId, borrowAmount, borrowToken } = req.body;
     
     if (!positionId || !borrowAmount || !borrowToken) {
@@ -294,7 +294,7 @@ router.post('/borrow', async (req: Request, res: Response) => {
  */
 router.get('/pools', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const pools = await sdk.defi.getStakingPools();
     
     res.json({
@@ -322,7 +322,7 @@ router.get('/pools', async (req: Request, res: Response) => {
  */
 router.get('/strategies', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const strategies = await sdk.defi.getYieldStrategies();
     
     res.json({
@@ -367,7 +367,7 @@ router.get('/strategies', async (req: Request, res: Response) => {
  */
 router.post('/calculate-yield', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const { assetId, strategy, duration } = req.body;
     
     if (!assetId || !strategy || !duration) {
@@ -411,7 +411,7 @@ router.post('/calculate-yield', async (req: Request, res: Response) => {
  */
 router.get('/analytics', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const analytics = await sdk.defi.getDeFiAnalytics();
     
     res.json({

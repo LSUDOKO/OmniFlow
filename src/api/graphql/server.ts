@@ -4,27 +4,27 @@ import express from 'express';
 import { execute, subscribe } from 'graphql';
 import { SubscriptionServer } from 'subscriptions-transport-ws';
 import { makeExecutableSchema } from '@graphql-tools/schema';
-import { OmniFlowSDK } from '../sdk';
+import { SolanaFlowSDK } from '../sdk';
 import { SDKConfig } from '../sdk/core/types';
 import { typeDefs } from './schema';
 import { resolvers, pubsub } from './resolvers';
 
 /**
- * OmniFlow GraphQL API Server
+ * SolanaFlow GraphQL API Server
  * Provides comprehensive GraphQL endpoints with real-time subscriptions
  */
-export class OmniFlowGraphQLServer {
+export class SolanaFlowGraphQLServer {
   private app: express.Application;
   private httpServer: any;
   private apolloServer: ApolloServer;
-  private sdk: OmniFlowSDK;
+  private sdk: SolanaFlowSDK;
   private port: number;
   private subscriptionServer: SubscriptionServer | null = null;
 
   constructor(config: SDKConfig, port: number = 4000) {
     this.app = express();
     this.port = port;
-    this.sdk = new OmniFlowSDK(config);
+    this.sdk = new SolanaFlowSDK(config);
     
     this.setupServer();
   }
@@ -107,7 +107,7 @@ export class OmniFlowGraphQLServer {
     try {
       // Initialize SDK
       await this.sdk.initialize();
-      console.log('OmniFlow SDK initialized for GraphQL server');
+      console.log('SolanaFlow SDK initialized for GraphQL server');
 
       // Apply Apollo GraphQL middleware
       await this.apolloServer.start();
@@ -160,13 +160,13 @@ export class OmniFlowGraphQLServer {
 
       // Start HTTP server
       this.httpServer.listen(this.port, () => {
-        console.log(`🚀 OmniFlow GraphQL Server running on port ${this.port}`);
+        console.log(`🚀 SolanaFlow GraphQL Server running on port ${this.port}`);
         console.log(`📊 GraphQL Playground: http://localhost:${this.port}${this.apolloServer.graphqlPath}`);
         console.log(`🔄 Subscriptions: ws://localhost:${this.port}/graphql`);
         console.log(`🔍 Health Check: http://localhost:${this.port}/health`);
       });
     } catch (error) {
-      console.error('Failed to start OmniFlow GraphQL Server:', error);
+      console.error('Failed to start SolanaFlow GraphQL Server:', error);
       process.exit(1);
     }
   }
@@ -245,7 +245,7 @@ export class OmniFlowGraphQLServer {
       await this.sdk.disconnect();
       
       this.httpServer.close(() => {
-        console.log('OmniFlow GraphQL Server stopped gracefully');
+        console.log('SolanaFlow GraphQL Server stopped gracefully');
       });
     } catch (error) {
       console.error('Error during GraphQL server shutdown:', error);
@@ -269,14 +269,14 @@ export class OmniFlowGraphQLServer {
   /**
    * Get SDK instance
    */
-  getSDK(): OmniFlowSDK {
+  getSDK(): SolanaFlowSDK {
     return this.sdk;
   }
 }
 
 // Export factory function for easy server creation
-export function createOmniFlowGraphQLServer(config: SDKConfig, port?: number): OmniFlowGraphQLServer {
-  return new OmniFlowGraphQLServer(config, port);
+export function createSolanaFlowGraphQLServer(config: SDKConfig, port?: number): SolanaFlowGraphQLServer {
+  return new SolanaFlowGraphQLServer(config, port);
 }
 
 // CLI entry point
@@ -302,7 +302,7 @@ if (require.main === module) {
     privateKey: process.env.PRIVATE_KEY,
   };
 
-  const server = createOmniFlowGraphQLServer(config, parseInt(process.env.GRAPHQL_PORT || '4000'));
+  const server = createSolanaFlowGraphQLServer(config, parseInt(process.env.GRAPHQL_PORT || '4000'));
   
   // Handle graceful shutdown
   process.on('SIGINT', async () => {

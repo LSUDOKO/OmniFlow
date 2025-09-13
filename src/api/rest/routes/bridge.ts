@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { OmniFlowSDK } from '../../sdk';
+import { SolanaFlowSDK } from '../../sdk';
 import { ChainId } from '../../sdk/core/types';
 
 const router = Router();
@@ -22,7 +22,7 @@ const router = Router();
  */
 router.get('/transfers', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const userAddress = req.query.userAddress as string;
     
     const transfers = await sdk.bridge.getBridgeTransfers(userAddress);
@@ -60,7 +60,7 @@ router.get('/transfers', async (req: Request, res: Response) => {
  */
 router.get('/transfers/:id', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const transfer = await sdk.bridge.getBridgeTransfer(req.params.id);
     
     if (!transfer) {
@@ -111,7 +111,7 @@ router.get('/transfers/:id', async (req: Request, res: Response) => {
  */
 router.post('/transfer', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const { assetId, targetChainId, recipient } = req.body;
     
     if (!assetId || !targetChainId) {
@@ -170,7 +170,7 @@ router.post('/transfer', async (req: Request, res: Response) => {
  */
 router.post('/estimate', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const { assetId, targetChainId } = req.body;
     
     if (!assetId || !targetChainId) {
@@ -214,7 +214,7 @@ router.post('/estimate', async (req: Request, res: Response) => {
  */
 router.get('/routes', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const routes = await sdk.bridge.getSupportedRoutes();
     
     res.json({
@@ -248,7 +248,7 @@ router.get('/routes', async (req: Request, res: Response) => {
  */
 router.post('/transfers/:id/cancel', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const transaction = await sdk.bridge.cancelBridgeTransfer(req.params.id);
     
     res.json({
@@ -275,7 +275,7 @@ router.post('/transfers/:id/cancel', async (req: Request, res: Response) => {
  */
 router.get('/analytics', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const analytics = await sdk.bridge.getBridgeAnalytics();
     
     res.json({

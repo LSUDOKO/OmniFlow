@@ -12,9 +12,9 @@ import { AnalyticsManager } from '../managers/AnalyticsManager';
 import { PluginManager } from '../managers/PluginManager';
 
 /**
- * Main OmniFlow SDK class - Entry point for all RWA marketplace interactions
+ * Main SolanaFlow SDK class - Entry point for all RWA marketplace interactions
  */
-export class OmniFlowSDK extends EventEmitter {
+export class SolanaFlowSDK extends EventEmitter {
   private config: SDKConfig;
   private providers: Map<ChainId, ChainProvider> = new Map();
   private initialized = false;
@@ -286,8 +286,8 @@ export class OmniFlowSDK extends EventEmitter {
   /**
    * Static factory method for quick setup
    */
-  static async create(config: SDKConfig): Promise<OmniFlowSDK> {
-    const sdk = new OmniFlowSDK(config);
+  static async create(config: SDKConfig): Promise<SolanaFlowSDK> {
+    const sdk = new SolanaFlowSDK(config);
     await sdk.initialize();
     return sdk;
   }
@@ -295,7 +295,7 @@ export class OmniFlowSDK extends EventEmitter {
   /**
    * Static method for OneChain-only setup (hackathon demo)
    */
-  static async createOneChainDemo(apiKey: string): Promise<OmniFlowSDK> {
+  static async createOneChainDemo(apiKey: string): Promise<SolanaFlowSDK> {
     const config: SDKConfig = {
       apiKey,
       chains: ['onechain'],
@@ -305,6 +305,6 @@ export class OmniFlowSDK extends EventEmitter {
       enableRealTime: true,
     };
 
-    return OmniFlowSDK.create(config);
+    return SolanaFlowSDK.create(config);
   }
 }

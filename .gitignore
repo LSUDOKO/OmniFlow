@@ -140,7 +140,7 @@ gas-report.txt
 .hardhat_console_history
 
 # Foundry files
-lib/
+lib/forge/
 cache_forge/
 out_forge/
 broadcast/

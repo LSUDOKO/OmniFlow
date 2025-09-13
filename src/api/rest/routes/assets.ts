@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { OmniFlowSDK } from '../../sdk';
+import { SolanaFlowSDK } from '../../sdk';
 import { CreateAssetRequest, AssetFilter } from '../../sdk/core/types';
 
 const router = Router();
@@ -54,7 +54,7 @@ const router = Router();
  */
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     
     const filter: AssetFilter = {
       chainId: req.query.chainId as any,
@@ -100,7 +100,7 @@ router.get('/', async (req: Request, res: Response) => {
  */
 router.get('/:id', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const asset = await sdk.assets.getAsset(req.params.id);
     
     if (!asset) {
@@ -142,7 +142,7 @@ router.get('/:id', async (req: Request, res: Response) => {
  */
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const assetRequest: CreateAssetRequest = req.body;
     
     // Validate required fields
@@ -197,7 +197,7 @@ router.post('/', async (req: Request, res: Response) => {
  */
 router.post('/:id/transfer', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const { toAddress } = req.body;
     
     if (!toAddress) {
@@ -253,7 +253,7 @@ router.post('/:id/transfer', async (req: Request, res: Response) => {
  */
 router.post('/:id/fractional', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const { totalShares, pricePerShare } = req.body;
     
     if (!totalShares || !pricePerShare) {
@@ -299,7 +299,7 @@ router.post('/:id/fractional', async (req: Request, res: Response) => {
  */
 router.get('/:id/valuation', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const valuation = await sdk.assets.getAssetValuation(req.params.id);
     
     res.json({
@@ -332,7 +332,7 @@ router.get('/:id/valuation', async (req: Request, res: Response) => {
  */
 router.get('/:id/compliance', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const compliance = await sdk.assets.validateCompliance(req.params.id);
     
     res.json({
@@ -366,7 +366,7 @@ router.get('/:id/compliance', async (req: Request, res: Response) => {
  */
 router.get('/search', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const query = req.query.q as string;
     
     if (!query) {
@@ -410,7 +410,7 @@ router.get('/search', async (req: Request, res: Response) => {
  */
 router.get('/types/:type', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const assets = await sdk.assets.getAssetsByType(req.params.type as any);
     
     res.json({
@@ -445,7 +445,7 @@ router.get('/types/:type', async (req: Request, res: Response) => {
  */
 router.get('/owners/:address', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const assets = await sdk.assets.getAssetsByOwner(req.params.address);
     
     res.json({
@@ -481,7 +481,7 @@ router.get('/owners/:address', async (req: Request, res: Response) => {
  */
 router.get('/chains/:chainId', async (req: Request, res: Response) => {
   try {
-    const sdk = req.app.get('sdk') as OmniFlowSDK;
+    const sdk = req.app.get('sdk') as SolanaFlowSDK;
     const assets = await sdk.assets.getAssetsByChain(req.params.chainId as any);
     
     res.json({

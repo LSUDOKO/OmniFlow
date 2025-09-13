@@ -416,7 +416,7 @@ export class DeFiManager extends EventEmitter {
       {
         id: 'rwa-real-estate-pool',
         name: 'RWA Real Estate Pool',
-        protocol: 'OmniFlow',
+        protocol: 'SolanaFlow',
         apy: '12.5',
         tvl: '50000000',
         supportedAssets: ['real-estate'],
@@ -426,7 +426,7 @@ export class DeFiManager extends EventEmitter {
       {
         id: 'rwa-energy-pool',
         name: 'RWA Renewable Energy Pool',
-        protocol: 'OmniFlow',
+        protocol: 'SolanaFlow',
         apy: '15.8',
         tvl: '25000000',
         supportedAssets: ['renewable-energy'],
@@ -436,7 +436,7 @@ export class DeFiManager extends EventEmitter {
       {
         id: 'rwa-carbon-pool',
         name: 'RWA Carbon Credits Pool',
-        protocol: 'OmniFlow',
+        protocol: 'SolanaFlow',
         apy: '18.2',
         tvl: '15000000',
         supportedAssets: ['carbon-credits'],
