@@ -34,11 +34,11 @@ import {
   FaUsers,
   FaShieldAlt,
 } from "react-icons/fa";
-import { AssetESGProfile, ESGFilter, esgService } from "../../services/esgService";
-import ESGFilterPanel from "../../components/esg/ESGFilterPanel";
-import ESGAssetGrid from "../../components/esg/ESGAssetGrid";
-import ESGImpactDashboard from "../../components/esg/ESGImpactDashboard";
-import ESGScoreCard from "../../components/esg/ESGScoreCard";
+import { AssetESGProfile, ESGFilter, esgService } from "../../../services/esgService";
+import ESGFilterPanel from "../../../components/esg/ESGFilterPanel";
+import ESGAssetGrid from "../../../components/esg/ESGAssetGrid";
+import ESGImpactDashboard from "../../../components/esg/ESGImpactDashboard";
+import ESGScoreCard from "../../../components/esg/ESGScoreCard";
 
 export default function SustainabilityPage() {
   const [selectedAsset, setSelectedAsset] = useState<AssetESGProfile | null>(null);

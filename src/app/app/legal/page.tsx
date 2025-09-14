@@ -34,11 +34,11 @@ import {
   FaGavel,
   FaExclamationTriangle,
 } from "react-icons/fa";
-import ChatInterface from "../../components/legal/ChatInterface";
-import ComplianceAnalyzer from "../../components/legal/ComplianceAnalyzer";
-import RiskDashboard from "../../components/legal/RiskDashboard";
-import LegalResourceLibrary from "../../components/legal/LegalResourceLibrary";
-import { LegalQuery, RiskAssessment, legalBotService } from "../../services/legalBotService";
+import ChatInterface from "../../../components/legal/ChatInterface";
+import ComplianceAnalyzer from "../../../components/legal/ComplianceAnalyzer";
+import RiskDashboard from "../../../components/legal/RiskDashboard";
+import LegalResourceLibrary from "../../../components/legal/LegalResourceLibrary";
+import { LegalQuery, RiskAssessment, legalBotService } from "../../../services/legalBotService";
 
 export default function LegalPage() {
   const [activeTab, setActiveTab] = useState(0);

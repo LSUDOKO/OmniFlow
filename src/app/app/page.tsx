@@ -30,7 +30,11 @@ import {
   Brain,
   Award as Certificate,
   FileCheck,
-  Zap as SolanaIcon
+  Zap as SolanaIcon,
+  Vote,
+  Leaf as SustainabilityIcon,
+  User as IdentityIcon,
+  Scale as LegalIcon
 } from "lucide-react";
 import Link from "next/link";
 
@@ -49,6 +53,10 @@ const DueDiligenceContent = dynamic(() => import('./due-diligence/DueDiligenceCo
 const CertificatesContent = dynamic(() => import('./certificates/CertificatesContent'), { ssr: false });
 const AuthenticityContent = dynamic(() => import('./authenticity/AuthenticityContent'), { ssr: false });
 const SolanaRWAContent = dynamic(() => import('./solana-rwa/SolanaRWAContent'), { ssr: false });
+const GovernanceContent = dynamic(() => import('./governance/GovernanceContent'), { ssr: false });
+const SustainabilityContent = dynamic(() => import('./sustainability/SustainabilityContent'), { ssr: false });
+const IdentityPassportContent = dynamic(() => import('./identity-passport/IdentityPassportContent'), { ssr: false });
+const LegalContent = dynamic(() => import('./legal/LegalContent'), { ssr: false });
 // Sidebar Navigation Items
 const navigationItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, href: null },
@@ -63,6 +71,10 @@ const navigationItems = [
   { id: 'certificates', label: 'Certificates', icon: Certificate, href: null },
   { id: 'authenticity', label: 'Authenticity', icon: FileCheck, href: null },
   { id: 'solana-rwa', label: 'Solana RWA', icon: SolanaIcon, href: null },
+  { id: 'governance', label: 'Governance', icon: Vote, href: null },
+  { id: 'sustainability', label: 'Sustainability', icon: SustainabilityIcon, href: null },
+  { id: 'identity-passport', label: 'Identity Passport', icon: IdentityIcon, href: null },
+  { id: 'legal', label: 'Legal', icon: LegalIcon, href: null },
 ];
 
 const bottomNavItems = [
@@ -159,7 +171,7 @@ export default function AppPage() {
         </div>
 
         {/* Navigation Items */}
-        <div className="flex-1 p-4 space-y-2 overflow-y-auto scrollbar-hide hover:scrollbar-show">
+        <div className="flex-1 p-4 space-y-2 overflow-y-auto scrollbar-hide">
           {navigationItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -381,6 +393,10 @@ export default function AppPage() {
                 {activeTab === 'certificates' && <CertificatesContent />}
                 {activeTab === 'authenticity' && <AuthenticityContent />}
                 {activeTab === 'solana-rwa' && <SolanaRWAContent />}
+                {activeTab === 'governance' && <GovernanceContent />}
+                {activeTab === 'sustainability' && <SustainabilityContent />}
+                {activeTab === 'identity-passport' && <IdentityPassportContent />}
+                {activeTab === 'legal' && <LegalContent />}
                 {activeTab === 'settings' && <SettingsContent />}
                 {activeTab === 'help' && <HelpSupportContent />}
               </motion.div>

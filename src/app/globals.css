@@ -19,6 +19,16 @@
   border-radius: 4px;
 }
 
+/* Hidden scrollbar utility classes */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(245, 158, 11, 0.7);
 }

@@ -17,8 +17,8 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { FaVoteYea, FaCoins, FaChartPie } from "react-icons/fa";
-import GovernanceDashboard from "../../components/governance/GovernanceDashboard";
-import FractionalOwnershipViewer from "../../components/governance/FractionalOwnershipViewer";
+import GovernanceDashboard from "../../../components/governance/GovernanceDashboard";
+import FractionalOwnershipViewer from "../../../components/governance/FractionalOwnershipViewer";
 
 export default function GovernancePage() {
   const bgGradient = useColorModeValue(

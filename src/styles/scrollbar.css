@@ -1,0 +1,36 @@
+/* Custom scrollbar styles for sidebar */
+.scrollbar-hide {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  -webkit-scrollbar: none;
+  /* Hide scrollbar for IE, Edge and Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-show {
+  /* Show scrollbar on hover for Chrome, Safari and Opera */
+  -webkit-scrollbar: 6px;
+  -webkit-scrollbar-track: transparent;
+  -webkit-scrollbar-thumb: rgba(255, 255, 255, 0.2);
+  -webkit-scrollbar-thumb:hover: rgba(255, 255, 255, 0.4);
+  
+  /* Show scrollbar for Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+/* Smooth scrollbar appearance */
+.scrollbar-hide:hover {
+  -webkit-scrollbar: 6px;
+  -webkit-scrollbar-track: transparent;
+  -webkit-scrollbar-thumb: rgba(255, 255, 255, 0.2);
+  -webkit-scrollbar-thumb:hover: rgba(255, 255, 255, 0.4);
+  
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+/* Smooth transition for scrollbar */
+.scrollbar-hide {
+  transition: scrollbar-width 0.3s ease;
+}
