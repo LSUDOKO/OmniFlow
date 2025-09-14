@@ -108,8 +108,8 @@ class SolanaRWAService {
         image: imageUri,
         seller_fee_basis_points: 500, // 5% royalty
         collection: {
-          name: "OmniFlow RWA Collection",
-          family: "OmniFlow",
+          name: "SolanaFlow RWA Collection",
+          family: "SolanaFlow",
         },
       };
 

@@ -1,19 +1,32 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import { Providers } from "./providers";
 import { WalletProvider } from "@/contexts/WalletContext";
+import { Web3OnboardingProvider } from "@/contexts/Web3OnboardingContext";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ 
+  subsets: ["latin"],
+  display: 'swap',
+  fallback: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'sans-serif'],
+  variable: '--font-inter'
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  display: 'swap',
+  fallback: ['Georgia', 'Times New Roman', 'serif'],
+  variable: '--font-playfair'
+});
 
 export const metadata: Metadata = {
-  title: "SolanaFlow - Cross-Chain RWA Marketplace",
-  description: "The world's first production-ready cross-chain marketplace for Real World Assets. Tokenize, trade, and fractionalize any asset with institutional-grade security.",
-  keywords: "RWA, Real World Assets, Cross-chain, OneChain, SUI, NFT, DeFi, Tokenization, Marketplace",
+  title: "SolanaFlow - Universal Cross-Chain RWA + Identity Router",
+  description: "Production-ready universal cross-chain platform for Real World Assets tokenization with integrated decentralized identity, AI-powered due diligence, gamification, and comprehensive compliance.",
+  keywords: "RWA, Real World Assets, Cross-chain, Web3Auth, MetaMask, Identity NFT, DeFi, Tokenization, Marketplace, Gamification, AI Due Diligence",
   authors: [{ name: "SolanaFlow Team" }],
   openGraph: {
-    title: "SolanaFlow - Cross-Chain RWA Marketplace",
-    description: "Trade real-world assets across multiple blockchains with institutional-grade security",
+    title: "SolanaFlow - Universal Cross-Chain RWA + Identity Router",
+    description: "Create seedless wallets with email/social login and access the complete RWA ecosystem",
     type: "website",
   },
 };
@@ -25,9 +38,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.variable} ${playfair.variable} font-sans`}>
         <WalletProvider>
-          <Providers>{children}</Providers>
+          <Web3OnboardingProvider>
+            <Providers>{children}</Providers>
+          </Web3OnboardingProvider>
         </WalletProvider>
       </body>
     </html>

@@ -200,7 +200,7 @@ export const WalletIntegrationExample: React.FC = () => {
                   Switch between supported blockchain networks seamlessly
                 </Text>
                 <SimpleGrid columns={{ base: 2, md: 4 }} spacing={3} w="full">
-                  {Object.entries(supportedChains).map(([key, config]) => (
+                  {Object.entries(supportedChains).map(([key, config]: [string, any]) => (
                     <Button
                       key={key}
                       onClick={() => handleChainSwitch(key)}

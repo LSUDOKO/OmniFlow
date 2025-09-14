@@ -1,19 +1,18 @@
-import { SolanaFlowSDK } from '../sdk';
+import { OmniFlowSDK } from '../../sdk/core/OmniFlowSDK';
 import { 
   Asset, 
   MarketplaceListing, 
-  DeFiPosition, 
+  StakingPosition,
+  LendingPosition,
   BridgeTransfer,
-  CreateAssetRequest,
-  AssetFilter,
-  MarketplaceFilter,
   ChainId,
   AssetType,
-  ListingType
-} from '../sdk/core/types';
+  FilterOptions
+} from '../../sdk/core/types';
 import { PubSub } from 'graphql-subscriptions';
 
-const pubsub = new PubSub();
+// Type assertion to fix asyncIterator method recognition
+const pubsub = new PubSub() as any;
 
 export const resolvers = {
   // Custom scalar resolvers
@@ -60,109 +59,114 @@ export const resolvers = {
   },
 
   MarketplaceListing: {
-    chainId: (listing: MarketplaceListing) => listing.chainId.toUpperCase(),
+    chainId: (listing: MarketplaceListing) => 'ethereum',
     listingType: (listing: MarketplaceListing) => listing.listingType.toUpperCase(),
     status: (listing: MarketplaceListing) => listing.status.toUpperCase(),
-    asset: async (listing: MarketplaceListing, _: any, { sdk }: { sdk: SolanaFlowSDK }) => {
+    asset: async (listing: MarketplaceListing, _: any, { sdk }: { sdk: OmniFlowSDK }) => {
       return await sdk.assets.getAsset(listing.assetId);
     },
   },
 
-  DeFiPosition: {
-    chainId: (position: DeFiPosition) => position.chainId.toUpperCase(),
-    type: (position: DeFiPosition) => position.type.toUpperCase().replace('-', '_'),
-    status: (position: DeFiPosition) => position.status.toUpperCase(),
-    asset: async (position: DeFiPosition, _: any, { sdk }: { sdk: SolanaFlowSDK }) => {
+  StakingPosition: {
+    status: (position: StakingPosition) => position.status.toUpperCase(),
+    asset: async (position: StakingPosition, _: any, { sdk }: { sdk: OmniFlowSDK }) => {
+      return await sdk.assets.getAsset(position.assetId);
+    },
+  },
+
+  LendingPosition: {
+    status: (position: LendingPosition) => position.status.toUpperCase(),
+    asset: async (position: LendingPosition, _: any, { sdk }: { sdk: OmniFlowSDK }) => {
       return await sdk.assets.getAsset(position.assetId);
     },
   },
 
   BridgeTransfer: {
-    sourceChainId: (transfer: BridgeTransfer) => transfer.sourceChainId.toUpperCase(),
-    targetChainId: (transfer: BridgeTransfer) => transfer.targetChainId.toUpperCase(),
+    fromChain: (transfer: BridgeTransfer) => transfer.fromChain.toUpperCase(),
+    toChain: (transfer: BridgeTransfer) => transfer.toChain.toUpperCase(),
     status: (transfer: BridgeTransfer) => transfer.status.toUpperCase(),
-    asset: async (transfer: BridgeTransfer, _: any, { sdk }: { sdk: SolanaFlowSDK }) => {
+    asset: async (transfer: BridgeTransfer, _: any, { sdk }: { sdk: OmniFlowSDK }) => {
       return await sdk.assets.getAsset(transfer.assetId);
     },
   },
 
   Query: {
     // Asset queries
-    asset: async (_: any, { id }: { id: string }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    asset: async (_: any, { id }: { id: string }, { sdk }: { sdk: OmniFlowSDK }) => {
       return await sdk.assets.getAsset(id);
     },
 
     assets: async (_: any, { filter, limit, offset }: { 
-      filter?: AssetFilter; 
+      filter?: FilterOptions; 
       limit?: number; 
       offset?: number; 
-    }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    }, { sdk }: { sdk: OmniFlowSDK }) => {
       const assets = await sdk.assets.getAssets(filter);
       const start = offset || 0;
       const end = limit ? start + limit : undefined;
       return assets.slice(start, end);
     },
 
-    assetsByType: async (_: any, { type }: { type: AssetType }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    assetsByType: async (_: any, { type }: { type: AssetType }, { sdk }: { sdk: OmniFlowSDK }) => {
       const normalizedType = type.toLowerCase().replace('_', '-') as AssetType;
       return await sdk.assets.getAssetsByType(normalizedType);
     },
 
-    assetsByOwner: async (_: any, { owner }: { owner: string }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    assetsByOwner: async (_: any, { owner }: { owner: string }, { sdk }: { sdk: OmniFlowSDK }) => {
       return await sdk.assets.getAssetsByOwner(owner);
     },
 
-    assetsByChain: async (_: any, { chainId }: { chainId: ChainId }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    assetsByChain: async (_: any, { chainId }: { chainId: ChainId }, { sdk }: { sdk: OmniFlowSDK }) => {
       const normalizedChainId = chainId.toLowerCase() as ChainId;
       return await sdk.assets.getAssetsByChain(normalizedChainId);
     },
 
-    searchAssets: async (_: any, { query }: { query: string }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    searchAssets: async (_: any, { query }: { query: string }, { sdk }: { sdk: OmniFlowSDK }) => {
       return await sdk.assets.searchAssets(query);
     },
 
-    assetValuation: async (_: any, { id }: { id: string }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    assetValuation: async (_: any, { id }: { id: string }, { sdk }: { sdk: OmniFlowSDK }) => {
       return await sdk.assets.getAssetValuation(id);
     },
 
-    validateCompliance: async (_: any, { id }: { id: string }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    validateCompliance: async (_: any, { id }: { id: string }, { sdk }: { sdk: OmniFlowSDK }) => {
       return await sdk.assets.validateCompliance(id);
     },
 
     // Marketplace queries
-    listing: async (_: any, { id }: { id: string }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    listing: async (_: any, { id }: { id: string }, { sdk }: { sdk: OmniFlowSDK }) => {
       return await sdk.marketplace.getListing(id);
     },
 
     listings: async (_: any, { filter, limit, offset }: { 
-      filter?: MarketplaceFilter; 
+      filter?: FilterOptions; 
       limit?: number; 
       offset?: number; 
-    }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    }, { sdk }: { sdk: OmniFlowSDK }) => {
       const listings = await sdk.marketplace.getListings(filter);
       const start = offset || 0;
       const end = limit ? start + limit : undefined;
       return listings.slice(start, end);
     },
 
-    trendingListings: async (_: any, { limit }: { limit?: number }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    trendingListings: async (_: any, { limit }: { limit?: number }, { sdk }: { sdk: OmniFlowSDK }) => {
       return await sdk.marketplace.getTrendingListings(limit);
     },
 
-    recentSales: async (_: any, { limit }: { limit?: number }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    recentSales: async (_: any, { limit }: { limit?: number }, { sdk }: { sdk: OmniFlowSDK }) => {
       return await sdk.marketplace.getRecentSales(limit);
     },
 
-    searchListings: async (_: any, { query }: { query: string }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    searchListings: async (_: any, { query }: { query: string }, { sdk }: { sdk: OmniFlowSDK }) => {
       return await sdk.marketplace.searchListings(query);
     },
 
-    marketplaceStats: async (_: any, __: any, { sdk }: { sdk: SolanaFlowSDK }) => {
+    marketplaceStats: async (_: any, __: any, { sdk }: { sdk: OmniFlowSDK }) => {
       return await sdk.marketplace.getMarketplaceStats();
     },
 
     // DeFi queries
-    defiPosition: async (_: any, { id }: { id: string }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    defiPosition: async (_: any, { id }: { id: string }, { sdk }: { sdk: OmniFlowSDK }) => {
       const positions = await sdk.defi.getPositions();
       return positions.find(p => p.id === id) || null;
     },
@@ -171,27 +175,27 @@ export const resolvers = {
       userAddress?: string; 
       limit?: number; 
       offset?: number; 
-    }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    }, { sdk }: { sdk: OmniFlowSDK }) => {
       const positions = await sdk.defi.getPositions(userAddress);
       const start = offset || 0;
       const end = limit ? start + limit : undefined;
       return positions.slice(start, end);
     },
 
-    stakingPools: async (_: any, __: any, { sdk }: { sdk: SolanaFlowSDK }) => {
+    stakingPools: async (_: any, __: any, { sdk }: { sdk: OmniFlowSDK }) => {
       return await sdk.defi.getStakingPools();
     },
 
-    yieldStrategies: async (_: any, __: any, { sdk }: { sdk: SolanaFlowSDK }) => {
+    yieldStrategies: async (_: any, __: any, { sdk }: { sdk: OmniFlowSDK }) => {
       return await sdk.defi.getYieldStrategies();
     },
 
-    defiAnalytics: async (_: any, __: any, { sdk }: { sdk: SolanaFlowSDK }) => {
+    defiAnalytics: async (_: any, __: any, { sdk }: { sdk: OmniFlowSDK }) => {
       return await sdk.defi.getDeFiAnalytics();
     },
 
     // Bridge queries
-    bridgeTransfer: async (_: any, { id }: { id: string }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    bridgeTransfer: async (_: any, { id }: { id: string }, { sdk }: { sdk: OmniFlowSDK }) => {
       return await sdk.bridge.getBridgeTransfer(id);
     },
 
@@ -199,26 +203,26 @@ export const resolvers = {
       userAddress?: string; 
       limit?: number; 
       offset?: number; 
-    }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    }, { sdk }: { sdk: OmniFlowSDK }) => {
       const transfers = await sdk.bridge.getBridgeTransfers(userAddress);
       const start = offset || 0;
       const end = limit ? start + limit : undefined;
       return transfers.slice(start, end);
     },
 
-    supportedRoutes: async (_: any, __: any, { sdk }: { sdk: SolanaFlowSDK }) => {
+    supportedRoutes: async (_: any, __: any, { sdk }: { sdk: OmniFlowSDK }) => {
       return await sdk.bridge.getSupportedRoutes();
     },
 
-    bridgeAnalytics: async (_: any, __: any, { sdk }: { sdk: SolanaFlowSDK }) => {
+    bridgeAnalytics: async (_: any, __: any, { sdk }: { sdk: OmniFlowSDK }) => {
       return await sdk.bridge.getBridgeAnalytics();
     },
   },
 
   Mutation: {
     // Asset mutations
-    createAsset: async (_: any, { input }: { input: any }, { sdk }: { sdk: SolanaFlowSDK }) => {
-      const createRequest: CreateAssetRequest = {
+    createAsset: async (_: any, { input }: { input: any }, { sdk }: { sdk: OmniFlowSDK }) => {
+      const createRequest = {
         ...input,
         chainId: input.chainId.toLowerCase(),
         type: input.type.toLowerCase().replace('_', '-'),
@@ -232,7 +236,7 @@ export const resolvers = {
       return asset;
     },
 
-    transferAsset: async (_: any, { id, toAddress }: { id: string; toAddress: string }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    transferAsset: async (_: any, { id, toAddress }: { id: string; toAddress: string }, { sdk }: { sdk: OmniFlowSDK }) => {
       const transaction = await sdk.assets.transferAsset(id, toAddress);
       
       // Get updated asset and publish subscription event
@@ -248,7 +252,7 @@ export const resolvers = {
       id: string; 
       totalShares: number; 
       pricePerShare: string; 
-    }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    }, { sdk }: { sdk: OmniFlowSDK }) => {
       const asset = await sdk.assets.enableFractionalOwnership(id, totalShares, pricePerShare);
       
       // Publish subscription event
@@ -258,13 +262,13 @@ export const resolvers = {
     },
 
     // Marketplace mutations
-    createListing: async (_: any, { input }: { input: any }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    createListing: async (_: any, { input }: { input: any }, { sdk }: { sdk: OmniFlowSDK }) => {
       const asset = await sdk.assets.getAsset(input.assetId);
       if (!asset) {
         throw new Error('Asset not found');
       }
 
-      const listingType = input.listingType.toLowerCase() as ListingType;
+      const listingType = input.listingType.toLowerCase() as 'fixed' | 'auction' | 'fractional';
       const listing = await sdk.marketplace.createListing(asset, input.price, listingType, input.duration);
       
       // Publish subscription event
@@ -276,7 +280,7 @@ export const resolvers = {
     purchaseAsset: async (_: any, { listingId, buyerAddress }: { 
       listingId: string; 
       buyerAddress: string; 
-    }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    }, { sdk }: { sdk: OmniFlowSDK }) => {
       const transaction = await sdk.marketplace.purchaseAsset(listingId, buyerAddress);
       
       // Get updated listing and publish subscription event
@@ -292,7 +296,7 @@ export const resolvers = {
       listingId: string; 
       bidderAddress: string; 
       bidAmount: string; 
-    }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    }, { sdk }: { sdk: OmniFlowSDK }) => {
       const transaction = await sdk.marketplace.placeBid(listingId, bidderAddress, bidAmount);
       
       // Get updated listing and publish subscription event
@@ -307,7 +311,7 @@ export const resolvers = {
     cancelListing: async (_: any, { listingId, sellerAddress }: { 
       listingId: string; 
       sellerAddress: string; 
-    }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    }, { sdk }: { sdk: OmniFlowSDK }) => {
       const transaction = await sdk.marketplace.cancelListing(listingId, sellerAddress);
       
       // Get updated listing and publish subscription event
@@ -323,7 +327,7 @@ export const resolvers = {
       listingId: string; 
       newPrice: string; 
       sellerAddress: string; 
-    }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    }, { sdk }: { sdk: OmniFlowSDK }) => {
       const listing = await sdk.marketplace.updateListingPrice(listingId, newPrice, sellerAddress);
       
       // Publish subscription event
@@ -335,12 +339,12 @@ export const resolvers = {
     toggleFavorite: async (_: any, { listingId, userAddress }: { 
       listingId: string; 
       userAddress: string; 
-    }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    }, { sdk }: { sdk: OmniFlowSDK }) => {
       return await sdk.marketplace.toggleFavorite(listingId, userAddress);
     },
 
     // DeFi mutations
-    stakeAsset: async (_: any, { input }: { input: any }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    stakeAsset: async (_: any, { input }: { input: any }, { sdk }: { sdk: OmniFlowSDK }) => {
       const asset = await sdk.assets.getAsset(input.assetId);
       if (!asset) {
         throw new Error('Asset not found');
@@ -354,7 +358,7 @@ export const resolvers = {
       return position;
     },
 
-    unstakeAsset: async (_: any, { positionId }: { positionId: string }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    unstakeAsset: async (_: any, { positionId }: { positionId: string }, { sdk }: { sdk: OmniFlowSDK }) => {
       const transaction = await sdk.defi.unstakeAsset(positionId);
       
       // Publish subscription event
@@ -363,7 +367,7 @@ export const resolvers = {
       return transaction;
     },
 
-    claimRewards: async (_: any, { positionId }: { positionId: string }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    claimRewards: async (_: any, { positionId }: { positionId: string }, { sdk }: { sdk: OmniFlowSDK }) => {
       const transaction = await sdk.defi.claimRewards(positionId);
       
       // Publish subscription event
@@ -372,7 +376,7 @@ export const resolvers = {
       return transaction;
     },
 
-    depositCollateral: async (_: any, { input }: { input: any }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    depositCollateral: async (_: any, { input }: { input: any }, { sdk }: { sdk: OmniFlowSDK }) => {
       const asset = await sdk.assets.getAsset(input.assetId);
       if (!asset) {
         throw new Error('Asset not found');
@@ -381,11 +385,11 @@ export const resolvers = {
       return await sdk.defi.depositCollateral(asset, input.protocol, input.amount);
     },
 
-    borrowAgainstCollateral: async (_: any, { input }: { input: any }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    borrowAgainstCollateral: async (_: any, { input }: { input: any }, { sdk }: { sdk: OmniFlowSDK }) => {
       return await sdk.defi.borrowAgainstCollateral(input.positionId, input.borrowAmount, input.borrowToken);
     },
 
-    calculateYield: async (_: any, { input }: { input: any }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    calculateYield: async (_: any, { input }: { input: any }, { sdk }: { sdk: OmniFlowSDK }) => {
       const asset = await sdk.assets.getAsset(input.assetId);
       if (!asset) {
         throw new Error('Asset not found');
@@ -395,7 +399,7 @@ export const resolvers = {
     },
 
     // Bridge mutations
-    bridgeAsset: async (_: any, { input }: { input: any }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    bridgeAsset: async (_: any, { input }: { input: any }, { sdk }: { sdk: OmniFlowSDK }) => {
       const asset = await sdk.assets.getAsset(input.assetId);
       if (!asset) {
         throw new Error('Asset not found');
@@ -410,7 +414,7 @@ export const resolvers = {
       return transfer;
     },
 
-    estimateBridge: async (_: any, { input }: { input: any }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    estimateBridge: async (_: any, { input }: { input: any }, { sdk }: { sdk: OmniFlowSDK }) => {
       const asset = await sdk.assets.getAsset(input.assetId);
       if (!asset) {
         throw new Error('Asset not found');
@@ -420,12 +424,12 @@ export const resolvers = {
       return await sdk.bridge.estimateBridge(asset, targetChainId);
     },
 
-    cancelBridgeTransfer: async (_: any, { transferId }: { transferId: string }, { sdk }: { sdk: SolanaFlowSDK }) => {
+    cancelBridgeTransfer: async (_: any, { transferId }: { transferId: string }, { sdk }: { sdk: OmniFlowSDK }) => {
       return await sdk.bridge.cancelBridgeTransfer(transferId);
     },
 
     // Demo mutations
-    loadDemoData: async (_: any, __: any, { sdk }: { sdk: SolanaFlowSDK }) => {
+    loadDemoData: async (_: any, __: any, { sdk }: { sdk: OmniFlowSDK }) => {
       try {
         const [assets, listings, transfers] = await Promise.all([
           sdk.assets.loadDemoAssets(),
@@ -439,7 +443,7 @@ export const resolvers = {
       }
     },
 
-    simulateOneChainDemo: async (_: any, __: any, { sdk }: { sdk: SolanaFlowSDK }) => {
+    simulateOneChainDemo: async (_: any, __: any, { sdk }: { sdk: OmniFlowSDK }) => {
       try {
         const oneChainProvider = sdk.getProvider('onechain');
         if ('simulateHackathonDemo' in oneChainProvider) {
@@ -456,58 +460,58 @@ export const resolvers = {
   Subscription: {
     // Asset subscriptions
     assetCreated: {
-      subscribe: () => pubsub.asyncIterator(['ASSET_CREATED']),
+      subscribe: () => pubsub.asyncIterator('ASSET_CREATED'),
     },
 
-    assetUpdated: {
-      subscribe: () => pubsub.asyncIterator(['ASSET_UPDATED']),
+    marketUpdate: {
+      subscribe: () => pubsub.asyncIterator('MARKET_UPDATE'),
     },
 
     assetTransferred: {
-      subscribe: () => pubsub.asyncIterator(['ASSET_TRANSFERRED']),
+      subscribe: () => pubsub.asyncIterator('ASSET_TRANSFERRED'),
     },
 
     // Marketplace subscriptions
-    listingCreated: {
-      subscribe: () => pubsub.asyncIterator(['LISTING_CREATED']),
+    stakingPositionCreated: {
+      subscribe: () => pubsub.asyncIterator('STAKING_POSITION_CREATED'),
     },
 
-    listingUpdated: {
-      subscribe: () => pubsub.asyncIterator(['LISTING_UPDATED']),
+    portfolioUpdated: {
+      subscribe: () => pubsub.asyncIterator('PORTFOLIO_UPDATED'),
     },
 
     assetPurchased: {
-      subscribe: () => pubsub.asyncIterator(['ASSET_PURCHASED']),
+      subscribe: () => pubsub.asyncIterator('ASSET_PURCHASED'),
     },
 
-    bidPlaced: {
-      subscribe: () => pubsub.asyncIterator(['BID_PLACED']),
+    yieldClaimed: {
+      subscribe: () => pubsub.asyncIterator('YIELD_CLAIMED'),
     },
 
     // DeFi subscriptions
-    assetStaked: {
-      subscribe: () => pubsub.asyncIterator(['ASSET_STAKED']),
+    userActivity: {
+      subscribe: () => pubsub.asyncIterator('USER_ACTIVITY'),
     },
 
     assetUnstaked: {
-      subscribe: () => pubsub.asyncIterator(['ASSET_UNSTAKED']),
+      subscribe: () => pubsub.asyncIterator('ASSET_UNSTAKED'),
     },
 
-    rewardsClaimed: {
-      subscribe: () => pubsub.asyncIterator(['REWARDS_CLAIMED']),
+    transactionConfirmed: {
+      subscribe: () => pubsub.asyncIterator('TRANSACTION_CONFIRMED'),
     },
 
     // Bridge subscriptions
-    bridgeInitiated: {
-      subscribe: () => pubsub.asyncIterator(['BRIDGE_INITIATED']),
+    bridgeTransferInitiated: {
+      subscribe: () => pubsub.asyncIterator('BRIDGE_TRANSFER_INITIATED'),
     },
 
-    bridgeCompleted: {
-      subscribe: () => pubsub.asyncIterator(['BRIDGE_COMPLETED']),
+    bridgeTransferCompleted: {
+      subscribe: () => pubsub.asyncIterator('BRIDGE_TRANSFER_COMPLETED'),
     },
 
-    bridgeFailed: {
-      subscribe: () => pubsub.asyncIterator(['BRIDGE_FAILED']),
+    priceAlert: {
+      subscribe: () => pubsub.asyncIterator('PRICE_ALERT'),
     },
   },
 };

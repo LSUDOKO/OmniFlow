@@ -9,17 +9,25 @@ interface Asset {
   name: string;
   type: string;
   price: number;
+  pricePerToken: number;
   image: string;
   yield: number;
   available: number;
+  totalSupply: number;
   description: string;
   verified: boolean;
   chain: string;
+  marketCap: string;
+  liquidity: string;
+  riskScore: string;
+  aiScore: number;
+  compliance: string;
 }
 
 interface AssetCardProps {
   asset: Asset;
-  onBuy: (assetId: string) => void;
+  onBuy: () => void;
+  index?: number;
 }
 
 export default function AssetCard({ asset, onBuy }: AssetCardProps) {
@@ -29,7 +37,7 @@ export default function AssetCard({ asset, onBuy }: AssetCardProps) {
     setIsLoading(true);
     // Simulate transaction delay
     setTimeout(() => {
-      onBuy(asset.id);
+      onBuy();
       setIsLoading(false);
     }, 2000);
   };
@@ -54,7 +62,11 @@ export default function AssetCard({ asset, onBuy }: AssetCardProps) {
       {/* Asset Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="text-4xl">{asset.image}</div>
+          <img 
+            src={asset.image} 
+            alt={asset.name}
+            className="w-16 h-16 rounded-lg object-cover"
+          />
           <div className="flex flex-col gap-1">
             <div className={`px-2 py-1 rounded-full text-xs text-white ${getChainColor(asset.chain)}`}>
               {asset.chain}

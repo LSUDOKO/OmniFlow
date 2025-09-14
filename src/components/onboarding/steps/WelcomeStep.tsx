@@ -26,6 +26,9 @@ import { localizationService } from "../../../services/localizationService";
 interface WelcomeStepProps {
   data: any;
   onComplete: (data: any) => void;
+  onRegionChange?: (newRegion: string) => Promise<void>;
+  isLoading?: boolean;
+  setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function WelcomeStep({ data, onComplete }: WelcomeStepProps) {

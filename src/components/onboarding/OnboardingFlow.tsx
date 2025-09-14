@@ -30,6 +30,7 @@ import { kycService } from "../../services/kycService";
 import WelcomeStep from "./steps/WelcomeStep";
 import RegionSelectionStep from "./steps/RegionSelectionStep";
 import WalletSetupStep from "./steps/WalletSetupStep";
+import IdentityNFTStep from "./steps/IdentityNFTStep";
 import EmailVerificationStep from "./steps/EmailVerificationStep";
 import PhoneVerificationStep from "./steps/PhoneVerificationStep";
 import IdentityVerificationStep from "./steps/IdentityVerificationStep";
@@ -148,6 +149,7 @@ export default function OnboardingFlow({ isOpen, onClose, onComplete }: Onboardi
     WelcomeStep,
     RegionSelectionStep,
     WalletSetupStep,
+    IdentityNFTStep,
     EmailVerificationStep,
     PhoneVerificationStep,
     IdentityVerificationStep,
@@ -227,7 +229,7 @@ export default function OnboardingFlow({ isOpen, onClose, onComplete }: Onboardi
   };
 
   const progressPercentage = steps.length > 0 ? ((currentStepIndex + 1) / steps.length) * 100 : 0;
-  const t = localizationService.t;
+  const t = (key: string, params?: { [key: string]: string | number }) => localizationService.translate(key, params);
 
   return (
     <Modal 

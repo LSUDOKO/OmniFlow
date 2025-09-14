@@ -4,17 +4,35 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, XCircle, Loader, ArrowRight } from 'lucide-react';
 
-interface TransactionModalProps {
-  assetName: string;
+interface Asset {
+  id: string;
+  name: string;
+  type: string;
   price: number;
+  pricePerToken: number;
+  image: string;
+  yield: number;
+  available: number;
+  totalSupply: number;
+  description: string;
+  verified: boolean;
+  chain: string;
+  marketCap: string;
+  liquidity: string;
+  riskScore: string;
+  aiScore: number;
+  compliance: string;
+}
+
+interface TransactionModalProps {
+  asset: Asset;
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => Promise<boolean>;
 }
 
 export default function TransactionModal({
-  assetName,
-  price,
+  asset,
   isOpen,
   onClose,
   onConfirm,
@@ -49,7 +67,7 @@ export default function TransactionModal({
           <div className="text-center">
             <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-white">Transaction Successful!</h3>
-            <p className="text-gray-400">You have purchased tokens for {assetName}.</p>
+            <p className="text-gray-400">You have purchased tokens for {asset.name}.</p>
             <button
               onClick={onClose}
               className="mt-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg"
@@ -79,11 +97,11 @@ export default function TransactionModal({
             <div className="bg-gray-700/50 p-4 rounded-lg mb-4">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-gray-400">Asset:</span>
-                <span className="text-white font-medium">{assetName}</span>
+                <span className="text-white font-medium">{asset.name}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Price:</span>
-                <span className="text-white font-bold text-lg">${price.toLocaleString()}</span>
+                <span className="text-white font-bold text-lg">${asset.pricePerToken.toLocaleString()}</span>
               </div>
             </div>
             <p className="text-xs text-gray-500 mb-6">

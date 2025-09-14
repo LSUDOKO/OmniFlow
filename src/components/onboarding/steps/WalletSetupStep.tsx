@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   VStack,
   HStack,
@@ -16,6 +16,11 @@ import {
   Code,
   Badge,
   Spinner,
+  Input,
+  FormControl,
+  FormLabel,
+  Divider,
+  useToast,
 } from "@chakra-ui/react";
 import {
   FaWallet,
@@ -24,8 +29,15 @@ import {
   FaExternalLinkAlt,
   FaCheck,
   FaTimes,
+  FaEnvelope,
+  FaGoogle,
+  FaFacebook,
+  FaTwitter,
+  FaDiscord,
+  FaApple,
 } from "react-icons/fa";
 import { localizationService } from "../../../services/localizationService";
+import { useWeb3Auth } from "../../../hooks/useWeb3Auth";
 
 interface WalletSetupStepProps {
   data: any;
@@ -43,9 +55,66 @@ export default function WalletSetupStep({
   const [walletStatus, setWalletStatus] = useState<'none' | 'connecting' | 'connected' | 'error'>('none');
   const [walletAddress, setWalletAddress] = useState('');
   const [selectedWallet, setSelectedWallet] = useState('');
+  const [email, setEmail] = useState('');
+  const [walletType, setWalletType] = useState<'social' | 'traditional'>('social');
 
   const cardBg = useColorModeValue("white", "gray.800");
   const t = localizationService.t;
+  const toast = useToast();
+  
+  const {
+    isInitialized,
+    isConnected,
+    user,
+    wallet,
+    login,
+    loginWithEmail,
+    error: web3AuthError
+  } = useWeb3Auth();
+
+  // Social login options with Web3Auth
+  const socialLogins = [
+    {
+      id: 'google',
+      name: 'Google',
+      icon: FaGoogle,
+      description: 'Sign in with your Google account',
+      color: 'red.500',
+      features: ['Instant Setup', 'Seedless Wallet', 'Auto-Backup']
+    },
+    {
+      id: 'facebook',
+      name: 'Facebook',
+      icon: FaFacebook,
+      description: 'Sign in with your Facebook account',
+      color: 'blue.600',
+      features: ['Social Recovery', 'Easy Access', 'Secure Login']
+    },
+    {
+      id: 'twitter',
+      name: 'Twitter',
+      icon: FaTwitter,
+      description: 'Sign in with your Twitter account',
+      color: 'twitter.500',
+      features: ['Quick Setup', 'Social Proof', 'Web3 Native']
+    },
+    {
+      id: 'discord',
+      name: 'Discord',
+      icon: FaDiscord,
+      description: 'Sign in with your Discord account',
+      color: 'purple.600',
+      features: ['Community Access', 'Gaming Ready', 'Instant Wallet']
+    },
+    {
+      id: 'apple',
+      name: 'Apple',
+      icon: FaApple,
+      description: 'Sign in with your Apple ID',
+      color: 'gray.800',
+      features: ['Privacy First', 'Biometric Auth', 'Secure Enclave']
+    }
+  ];
 
   const wallets = [
     {
@@ -65,26 +134,117 @@ export default function WalletSetupStep({
       downloadUrl: 'https://walletconnect.com/',
       isInstalled: true, // Always available
       features: ['Mobile Wallets', 'QR Code', 'Cross-Platform']
-    },
-    {
-      id: 'onechain',
-      name: 'OneChain Wallet',
-      icon: '⛓️',
-      description: 'Native OneChain ecosystem wallet',
-      downloadUrl: 'https://onechain.com/wallet',
-      isInstalled: typeof window !== 'undefined' && !!(window as any).onechain,
-      features: ['OneChain Native', 'Low Fees', 'Fast Transactions']
-    },
-    {
-      id: 'coinbase',
-      name: 'Coinbase Wallet',
-      icon: '🔵',
-      description: 'Self-custody wallet by Coinbase',
-      downloadUrl: 'https://wallet.coinbase.com/',
-      isInstalled: typeof window !== 'undefined' && !!(window as any).ethereum?.isCoinbaseWallet,
-      features: ['DeFi Integration', 'NFT Support', 'Easy Onboarding']
     }
   ];
+
+  // Handle social login with Web3Auth
+  const handleSocialLogin = async (provider: string) => {
+    if (!isInitialized) {
+      toast({
+        title: 'Initializing...',
+        description: 'Please wait while we initialize the wallet system.',
+        status: 'info',
+        duration: 3000,
+      });
+      return;
+    }
+
+    setSelectedWallet(provider);
+    setWalletStatus('connecting');
+    setIsLoading(true);
+
+    try {
+      await login(provider);
+      
+      if (wallet) {
+        setWalletAddress(wallet.address);
+        setWalletStatus('connected');
+        
+        // Complete the step with Web3Auth data
+        onComplete({
+          walletAddress: wallet.address,
+          walletType: 'web3auth',
+          socialProvider: provider,
+          userInfo: user,
+          walletConnected: true,
+          seedless: true
+        });
+
+        toast({
+          title: 'Wallet Created Successfully!',
+          description: `Your seedless wallet has been created with ${provider}`,
+          status: 'success',
+          duration: 5000,
+        });
+      }
+    } catch (error: any) {
+      console.error('Social login error:', error);
+      setWalletStatus('error');
+      toast({
+        title: 'Connection Failed',
+        description: error.message || 'Failed to create wallet with social login',
+        status: 'error',
+        duration: 5000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle email login
+  const handleEmailLogin = async () => {
+    if (!email) {
+      toast({
+        title: 'Email Required',
+        description: 'Please enter your email address',
+        status: 'warning',
+        duration: 3000,
+      });
+      return;
+    }
+
+    setSelectedWallet('email');
+    setWalletStatus('connecting');
+    setIsLoading(true);
+
+    try {
+      await loginWithEmail(email);
+      
+      if (wallet) {
+        setWalletAddress(wallet.address);
+        setWalletStatus('connected');
+        
+        // Complete the step with Web3Auth data
+        onComplete({
+          walletAddress: wallet.address,
+          walletType: 'web3auth',
+          socialProvider: 'email',
+          email: email,
+          userInfo: user,
+          walletConnected: true,
+          seedless: true
+        });
+
+        toast({
+          title: 'Wallet Created Successfully!',
+          description: `Your seedless wallet has been created with email: ${email}`,
+          status: 'success',
+          duration: 5000,
+        });
+      }
+    } catch (error: any) {
+      console.error('Email login error:', error);
+      setWalletStatus('error');
+      toast({
+        title: 'Connection Failed',
+        description: error.message || 'Failed to create wallet with email',
+        status: 'error',
+        duration: 5000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const connectWallet = async (walletId: string) => {
     setSelectedWallet(walletId);
@@ -92,10 +252,6 @@ export default function WalletSetupStep({
     setIsLoading(true);
 
     try {
-      // Simulate wallet connection
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Mock wallet connection logic
       let address = '';
       switch (walletId) {
         case 'metamask':
@@ -109,16 +265,11 @@ export default function WalletSetupStep({
           }
           break;
         case 'walletconnect':
-          // Mock WalletConnect connection
-          address = '0x742d35Cc6634C0532925a3b8D4C9db96c4b4d1b7';
-          break;
-        case 'onechain':
-          // Mock OneChain wallet connection
-          address = '0x8ba1f109551bD432803012645Hac136c22C501e5';
-          break;
-        case 'coinbase':
-          // Mock Coinbase wallet connection
-          address = '0x95222290DD7278Aa3Ddd389Cc1E1d165CC4BAfe5';
+          // Use Web3Auth WalletConnect adapter
+          await login('walletconnect');
+          if (wallet) {
+            address = wallet.address;
+          }
           break;
         default:
           throw new Error('Unsupported wallet');
@@ -147,18 +298,53 @@ export default function WalletSetupStep({
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
+  // Check if Web3Auth is already connected
+  useEffect(() => {
+    if (isConnected && wallet && user) {
+      setWalletAddress(wallet.address);
+      setWalletStatus('connected');
+      onComplete({
+        walletAddress: wallet.address,
+        walletType: 'web3auth',
+        userInfo: user,
+        walletConnected: true,
+        seedless: true
+      });
+    }
+  }, [isConnected, wallet, user, onComplete]);
+
   return (
     <VStack spacing={8} align="stretch">
       {/* Header */}
       <VStack spacing={4} textAlign="center">
         <Icon as={FaWallet} boxSize={12} color="purple.500" />
         <Heading size="lg" color="gray.800">
-          {t('onboarding.connectWallet')}
+          Create Your Web3 Wallet
         </Heading>
         <Text color="gray.600" maxW="2xl">
-          {t('onboarding.walletDescription')}
+          Choose how you'd like to create your wallet. We recommend starting with email or social login for the easiest experience.
         </Text>
       </VStack>
+
+      {/* Wallet Type Toggle */}
+      <HStack justify="center" spacing={4}>
+        <Button
+          variant={walletType === 'social' ? 'solid' : 'outline'}
+          colorScheme="purple"
+          onClick={() => setWalletType('social')}
+          leftIcon={<Icon as={FaEnvelope} />}
+        >
+          Email & Social
+        </Button>
+        <Button
+          variant={walletType === 'traditional' ? 'solid' : 'outline'}
+          colorScheme="purple"
+          onClick={() => setWalletType('traditional')}
+          leftIcon={<Icon as={FaWallet} />}
+        >
+          Traditional Wallets
+        </Button>
+      </HStack>
 
       {/* Connection Status */}
       {walletStatus === 'connected' && (
@@ -170,6 +356,11 @@ export default function WalletSetupStep({
               <Text fontSize="sm">Address:</Text>
               <Code fontSize="sm">{formatAddress(walletAddress)}</Code>
             </HStack>
+            {user && (
+              <Text fontSize="sm" color="gray.600">
+                Connected with: {user.email || user.name || selectedWallet}
+              </Text>
+            )}
           </VStack>
         </Alert>
       )}
@@ -177,30 +368,104 @@ export default function WalletSetupStep({
       {walletStatus === 'error' && (
         <Alert status="error" rounded="lg">
           <AlertIcon />
-          <Text>Failed to connect wallet. Please try again or select a different wallet.</Text>
+          <Text>Failed to create wallet. Please try again or select a different method.</Text>
         </Alert>
       )}
 
-      {/* Wallet Options */}
-      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-        {wallets.map((wallet) => (
-          <Box
-            key={wallet.id}
-            bg={cardBg}
-            p={6}
-            rounded="xl"
-            border="2px solid"
-            borderColor={
-              selectedWallet === wallet.id && walletStatus === 'connecting'
-                ? "purple.500"
-                : wallet.isInstalled
-                ? "green.200"
-                : "gray.200"
-            }
-            shadow="md"
-            _hover={{ shadow: "lg", transform: "translateY(-2px)" }}
-            transition="all 0.2s"
-            position="relative"
+      {/* Social Login Options */}
+      {walletType === 'social' && (
+        <VStack spacing={6}>
+          {/* Email Login */}
+          <Box w="full">
+            <FormControl>
+              <FormLabel>Email Address</FormLabel>
+              <HStack>
+                <Input
+                  type="email"
+                  placeholder="Enter your email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  isDisabled={walletStatus === 'connecting'}
+                />
+                <Button
+                  colorScheme="purple"
+                  onClick={handleEmailLogin}
+                  isLoading={selectedWallet === 'email' && walletStatus === 'connecting'}
+                  loadingText="Creating..."
+                  leftIcon={<Icon as={FaEnvelope} />}
+                  minW="120px"
+                >
+                  Create Wallet
+                </Button>
+              </HStack>
+            </FormControl>
+          </Box>
+
+          <Divider />
+
+          {/* Social Login Options */}
+          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4} w="full">
+            {socialLogins.map((social) => (
+              <Button
+                key={social.id}
+                size="lg"
+                variant="outline"
+                leftIcon={<Icon as={social.icon} color={social.color} />}
+                onClick={() => handleSocialLogin(social.id)}
+                isLoading={selectedWallet === social.id && walletStatus === 'connecting'}
+                loadingText="Creating..."
+                isDisabled={walletStatus === 'connected'}
+                _hover={{ bg: `${social.color.split('.')[0]}.50` }}
+              >
+                Continue with {social.name}
+              </Button>
+            ))}
+          </SimpleGrid>
+
+          {/* Benefits of Social Login */}
+          <Box bg="purple.50" p={4} rounded="lg" border="1px solid" borderColor="purple.200">
+            <VStack spacing={2}>
+              <Text fontWeight="bold" color="purple.800">✨ Benefits of Seedless Wallets</Text>
+              <SimpleGrid columns={{ base: 1, md: 3 }} spacing={2} w="full">
+                <HStack>
+                  <Icon as={FaCheck} color="green.500" boxSize={3} />
+                  <Text fontSize="sm" color="purple.700">No seed phrases to remember</Text>
+                </HStack>
+                <HStack>
+                  <Icon as={FaCheck} color="green.500" boxSize={3} />
+                  <Text fontSize="sm" color="purple.700">Instant wallet creation</Text>
+                </HStack>
+                <HStack>
+                  <Icon as={FaCheck} color="green.500" boxSize={3} />
+                  <Text fontSize="sm" color="purple.700">Social recovery options</Text>
+                </HStack>
+              </SimpleGrid>
+            </VStack>
+          </Box>
+        </VStack>
+      )}
+
+      {/* Traditional Wallet Options */}
+      {walletType === 'traditional' && (
+        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
+          {wallets.map((wallet) => (
+            <Box
+              key={wallet.id}
+              bg={cardBg}
+              p={6}
+              rounded="xl"
+              border="2px solid"
+              borderColor={
+                selectedWallet === wallet.id && walletStatus === 'connecting'
+                  ? "purple.500"
+                  : wallet.isInstalled
+                  ? "green.200"
+                  : "gray.200"
+              }
+              shadow="md"
+              _hover={{ shadow: "lg", transform: "translateY(-2px)" }}
+              transition="all 0.2s"
+              position="relative"
           >
             {/* Status Indicators */}
             {wallet.isInstalled ? (
@@ -299,6 +564,7 @@ export default function WalletSetupStep({
           </Box>
         ))}
       </SimpleGrid>
+      )}
 
       {/* Security Notice */}
       <Box

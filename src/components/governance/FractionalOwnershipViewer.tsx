@@ -189,7 +189,7 @@ export default function FractionalOwnershipViewer({ assetId }: FractionalOwnersh
         id: "3",
         assetId: "1",
         amount: 30000,
-        per ShareAmount: 3.53,
+        perShareAmount: 3.53,
         distributedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
         claimed: false,
       },

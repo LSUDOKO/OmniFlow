@@ -95,7 +95,7 @@ class EnhancedWeb3AuthService {
       // Initialize MetaMask SDK for embedded wallet
       this.metamaskSDK = new MetaMaskSDK({
         dappMetadata: {
-          name: "OmniFlow - Universal Cross-Chain RWA Router",
+          name: "SolanaFlow - Universal Cross-Chain RWA Router",
           url: typeof window !== "undefined" ? window.location.origin : "https://omniflow.io",
           iconUrl: "https://omniflow.io/logo.svg",
         },
@@ -132,7 +132,7 @@ class EnhancedWeb3AuthService {
         privateKeyProvider: ethereumProvider,
         enableLogging: process.env.NODE_ENV === "development",
         uiConfig: {
-          appName: "OmniFlow",
+          appName: "SolanaFlow",
           appUrl: typeof window !== "undefined" ? window.location.origin : "https://omniflow.io",
           logoLight: "https://omniflow.io/logo-light.svg",
           logoDark: "https://omniflow.io/logo-dark.svg",
@@ -168,7 +168,7 @@ class EnhancedWeb3AuthService {
         adapterSettings: {
           uxMode: "popup",
           whiteLabel: {
-            appName: "OmniFlow - Universal Cross-Chain RWA Router",
+            appName: "SolanaFlow - Universal Cross-Chain RWA Router",
             appUrl: typeof window !== "undefined" ? window.location.origin : "https://omniflow.io",
             logoLight: "https://omniflow.io/logo-light.svg",
             logoDark: "https://omniflow.io/logo-dark.svg",
@@ -227,7 +227,7 @@ class EnhancedWeb3AuthService {
           walletConnectInitOptions: {
             projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "",
             metadata: {
-              name: "OmniFlow",
+              name: "SolanaFlow",
               description: "Universal Cross-Chain RWA + Identity Router",
               url: typeof window !== "undefined" ? window.location.origin : "https://omniflow.io",
               icons: ["https://omniflow.io/logo.svg"],

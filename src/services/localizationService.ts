@@ -657,8 +657,8 @@ class LocalizationService {
     return value;
   }
 
-  // Shorthand for translate
-  t(key: string, params?: { [key: string]: string | number }): string {
+  // Shorthand for translate - bound method to preserve 'this' context
+  t = (key: string, params?: { [key: string]: string | number }): string => {
     return this.translate(key, params);
   }
 

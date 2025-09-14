@@ -101,6 +101,40 @@ export const useBridge = () => {
         estimatedTime: '~7 minutes',
         supported: true,
       },
+      // Polygon <-> Solana via Wormhole
+      {
+        sourceChain: 'polygon',
+        destinationChain: 'solana',
+        protocol: 'wormhole',
+        fee: '~$0.05',
+        estimatedTime: '~3 minutes',
+        supported: true,
+      },
+      {
+        sourceChain: 'solana',
+        destinationChain: 'polygon',
+        protocol: 'wormhole',
+        fee: '~$0.01',
+        estimatedTime: '~5 minutes',
+        supported: true,
+      },
+      // BSC <-> Solana via Wormhole
+      {
+        sourceChain: 'bsc',
+        destinationChain: 'solana',
+        protocol: 'wormhole',
+        fee: '~$0.10',
+        estimatedTime: '~4 minutes',
+        supported: true,
+      },
+      {
+        sourceChain: 'solana',
+        destinationChain: 'bsc',
+        protocol: 'wormhole',
+        fee: '~$0.01',
+        estimatedTime: '~6 minutes',
+        supported: true,
+      },
       // Other EVM chains via native bridges
       {
         sourceChain: 'ethereum',

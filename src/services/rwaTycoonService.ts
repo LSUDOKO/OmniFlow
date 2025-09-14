@@ -768,7 +768,7 @@ export class RWATycoonService {
   private startGameLoop(): void {
     // Process daily returns every 24 hours
     setInterval(async () => {
-      for (const [address] of this.players) {
+      for (const [address] of Array.from(this.players.entries())) {
         try {
           await this.processDailyReturns(address);
         } catch (error) {
