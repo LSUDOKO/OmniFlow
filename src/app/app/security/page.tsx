@@ -44,9 +44,9 @@ import {
   FaClock,
   FaGlobe,
 } from "react-icons/fa";
-import SecurityDashboard from "../../components/security/SecurityDashboard";
-import ThreatVisualization from "../../components/security/ThreatVisualization";
-import RealTimeAlerts from "../../components/security/RealTimeAlerts";
+import SecurityDashboard from "../../../components/security/SecurityDashboard";
+import ThreatVisualization from "../../../components/security/ThreatVisualization";
+import RealTimeAlerts from "../../../components/security/RealTimeAlerts";
 
 export default function SecurityPage() {
   const [activeTab, setActiveTab] = useState(0);

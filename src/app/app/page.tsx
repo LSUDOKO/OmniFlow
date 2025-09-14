@@ -40,6 +40,7 @@ import Link from "next/link";
 
 // Dynamic imports for different sections
 const DashboardContent = dynamic(() => import('./dashboard/DashboardContent'), { ssr: false });
+const LegalContent = dynamic(() => import('./legal/LegalContent'), { ssr: false });
 const MarketplaceContent = dynamic(() => import('./marketplace/MarketplaceContent'), { ssr: false });
 const PortfolioContent = dynamic(() => import('./portfolio/PortfolioContent'), { ssr: false });
 const AnalyticsContent = dynamic(() => import('./analytics/AnalyticsContent'), { ssr: false });
@@ -56,7 +57,6 @@ const SolanaRWAContent = dynamic(() => import('./solana-rwa/SolanaRWAContent'), 
 const GovernanceContent = dynamic(() => import('./governance/GovernanceContent'), { ssr: false });
 const SustainabilityContent = dynamic(() => import('./sustainability/SustainabilityContent'), { ssr: false });
 const IdentityPassportContent = dynamic(() => import('./identity-passport/IdentityPassportContent'), { ssr: false });
-const LegalContent = dynamic(() => import('./legal/LegalContent'), { ssr: false });
 // Sidebar Navigation Items
 const navigationItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, href: null },
