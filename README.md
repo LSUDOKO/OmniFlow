@@ -1,10 +1,10 @@
-# OmniFlow - Universal Cross-Chain RWA + Identity Router
+# SolanaFlow - Universal Cross-Chain RWA + Identity Router
 
-<img width="702" height="263" alt="OmniFlow Platform" src="https://github.com/user-attachments/assets/9200388a-29fa-47bf-be07-876a3b93226e" />
+<img width="702" height="263" alt="SolanaFlow Platform" src="https://github.com/user-attachments/assets/9200388a-29fa-47bf-be07-876a3b93226e" />
 
 ## 🌟 Overview
 
-**OmniFlow** is a production-ready universal cross-chain platform for Real World Assets (RWA) tokenization with integrated decentralized identity, AI-powered due diligence, gamification, and comprehensive compliance. Built for the MetaMask hackathon, qualifying for both Cross-Chain Interoperability and RWA Tokenization tracks. Features institutional-grade security, regulatory compliance, and an engaging gamified experience that transforms RWA investing into an addictive simulation game.
+**SolanaFlow** is a production-ready universal cross-chain platform for Real World Assets (RWA) tokenization with integrated decentralized identity, AI-powered due diligence, gamification, and comprehensive compliance. Built for the MetaMask hackathon, qualifying for both Cross-Chain Interoperability and RWA Tokenization tracks. Features institutional-grade security, regulatory compliance, and an engaging gamified experience that transforms RWA investing into an addictive simulation game.
 
 ### ✨ Core Features
 
@@ -197,7 +197,7 @@ node scripts/setup-ai.js
 npm run dev
 ```
 
-Visit `http://localhost:3000` to access OmniFlow.
+Visit `http://localhost:3000` to access SolanaFlow.
 
 ### Demo Features
 

@@ -34,13 +34,17 @@ import {
   Vote,
   Leaf as SustainabilityIcon,
   User as IdentityIcon,
-  Scale as LegalIcon
+  Scale as LegalIcon,
+  Brain as AIIcon,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
 import Link from "next/link";
 
 // Dynamic imports for different sections
 const DashboardContent = dynamic(() => import('./dashboard/DashboardContent'), { ssr: false });
 const LegalContent = dynamic(() => import('./legal/LegalContent'), { ssr: false });
+const AIMatchingContent = dynamic(() => import('./ai-matching/AIMatchingContent'), { ssr: false });
 const MarketplaceContent = dynamic(() => import('./marketplace/MarketplaceContent'), { ssr: false });
 const PortfolioContent = dynamic(() => import('./portfolio/PortfolioContent'), { ssr: false });
 const AnalyticsContent = dynamic(() => import('./analytics/AnalyticsContent'), { ssr: false });
@@ -57,24 +61,29 @@ const SolanaRWAContent = dynamic(() => import('./solana-rwa/SolanaRWAContent'), 
 const GovernanceContent = dynamic(() => import('./governance/GovernanceContent'), { ssr: false });
 const SustainabilityContent = dynamic(() => import('./sustainability/SustainabilityContent'), { ssr: false });
 const IdentityPassportContent = dynamic(() => import('./identity-passport/IdentityPassportContent'), { ssr: false });
-// Sidebar Navigation Items
-const navigationItems = [
+// Priority Navigation Items (MetaMask Hackathon Demo Flow)
+const priorityNavItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, href: null },
+  { id: 'identity-passport', label: 'Identity Passport', icon: IdentityIcon, href: null },
   { id: 'marketplace', label: 'Marketplace', icon: ShoppingCart, href: null },
-  { id: 'portfolio', label: 'Portfolio', icon: PieChart, href: null },
-  { id: 'analytics', label: 'Analytics', icon: BarChart3, href: null },
+  { id: 'solana-rwa', label: 'Solana RWA', icon: SolanaIcon, href: null },
   { id: 'bridge', label: 'Bridge', icon: ArrowLeftRight, href: null },
   { id: 'yield', label: 'Yield Vaults', icon: TrendingUp, href: null },
+  { id: 'portfolio', label: 'Portfolio', icon: PieChart, href: null },
+];
+
+// Additional Navigation Items (Collapsible)
+const additionalNavItems = [
+  { id: 'analytics', label: 'Analytics', icon: BarChart3, href: null },
   { id: 'tycoon', label: 'RWA Tycoon', icon: Award, href: null },
   { id: 'compliance', label: 'Compliance', icon: Shield, href: null },
   { id: 'due-diligence', label: 'Due Diligence', icon: Brain, href: null },
   { id: 'certificates', label: 'Certificates', icon: Certificate, href: null },
   { id: 'authenticity', label: 'Authenticity', icon: FileCheck, href: null },
-  { id: 'solana-rwa', label: 'Solana RWA', icon: SolanaIcon, href: null },
   { id: 'governance', label: 'Governance', icon: Vote, href: null },
   { id: 'sustainability', label: 'Sustainability', icon: SustainabilityIcon, href: null },
-  { id: 'identity-passport', label: 'Identity Passport', icon: IdentityIcon, href: null },
   { id: 'legal', label: 'Legal', icon: LegalIcon, href: null },
+  { id: 'ai-matching', label: 'AI Matching', icon: AIIcon, href: null },
 ];
 
 const bottomNavItems = [
@@ -136,6 +145,7 @@ const previewCards = [
 
 export default function AppPage() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [showMoreItems, setShowMoreItems] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { address, isConnected } = useAccount();
   const router = useRouter();
@@ -170,9 +180,9 @@ export default function AppPage() {
           </Link>
         </div>
 
-        {/* Navigation Items */}
+        {/* Priority Navigation Items */}
         <div className="flex-1 p-4 space-y-2 overflow-y-auto scrollbar-hide">
-          {navigationItems.map((item) => {
+          {priorityNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
             
@@ -217,6 +227,64 @@ export default function AppPage() {
               </motion.button>
             );
           })}
+          
+          {/* More+ Button */}
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowMoreItems(!showMoreItems)}
+            className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all text-gray-300 hover:text-white hover:bg-white/5 mt-4"
+          >
+            <div className="flex items-center space-x-3">
+              <ChevronDown className={`w-5 h-5 transition-transform ${showMoreItems ? 'rotate-180' : ''}`} />
+              <span className="font-medium">More</span>
+            </div>
+            <span className="text-xs bg-white/10 px-2 py-1 rounded-full">{additionalNavItems.length}</span>
+          </motion.button>
+          
+          {/* Additional Navigation Items (Collapsible) */}
+          <AnimatePresence>
+            {showMoreItems && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="space-y-2 overflow-hidden"
+              >
+                {additionalNavItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeTab === item.id;
+                  
+                  return (
+                    <motion.button
+                      key={item.id}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setActiveTab(item.id)}
+                      disabled={!isConnected}
+                      className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${
+                        isActive
+                          ? 'bg-gradient-to-r from-blue-600/20 to-purple-600/20 text-white border border-blue-500/30'
+                          : 'text-gray-300 hover:text-white hover:bg-white/5'
+                      } ${!isConnected ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span className="font-medium">{item.label}</span>
+                      {!isConnected && (
+                        <Lock className="w-4 h-4 ml-auto text-gray-500" />
+                      )}
+                      {isActive && (
+                        <motion.div
+                          layoutId="activeIndicator"
+                          className="ml-auto w-2 h-2 bg-blue-400 rounded-full"
+                        />
+                      )}
+                    </motion.button>
+                  );
+                })}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Bottom Navigation */}
@@ -275,7 +343,7 @@ export default function AppPage() {
         <div className="h-20 bg-black/10 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-8 flex-shrink-0">
           <div>
             <h1 className="text-2xl font-bold text-white capitalize">
-              {navigationItems.find(item => item.id === activeTab)?.label || 'Dashboard'}
+              {[...priorityNavItems, ...additionalNavItems].find(item => item.id === activeTab)?.label || 'Dashboard'}
             </h1>
             <p className="text-sm text-gray-400">
               {isConnected ? 'Connected and ready to trade' : 'Preview mode - Connect wallet to access full features'}
@@ -397,6 +465,7 @@ export default function AppPage() {
                 {activeTab === 'sustainability' && <SustainabilityContent />}
                 {activeTab === 'identity-passport' && <IdentityPassportContent />}
                 {activeTab === 'legal' && <LegalContent />}
+                {activeTab === 'ai-matching' && <AIMatchingContent />}
                 {activeTab === 'settings' && <SettingsContent />}
                 {activeTab === 'help' && <HelpSupportContent />}
               </motion.div>
