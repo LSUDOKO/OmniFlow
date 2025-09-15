@@ -1,6 +1,5 @@
 # SolanaFlow - Universal Cross-Chain RWA + Identity Router
 
-<img width="702" height="263" alt="SolanaFlow Platform" src="https://github.com/user-attachments/assets/9200388a-29fa-47bf-be07-876a3b93226e" />
 
 ## 🚀 **REVOLUTIONARY INNOVATIONS**
 
