@@ -161,6 +161,8 @@ export default function RWATycoonContent() {
   const [selectedTab, setSelectedTab] = useState('portfolio');
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<string | null>(null);
+  const [showClaimModal, setShowClaimModal] = useState(false);
+  const [claimedDay, setClaimedDay] = useState<number | null>(null);
 
   const getRarityColor = (rarity: string) => {
     switch (rarity.toLowerCase()) {
@@ -178,9 +180,16 @@ export default function RWATycoonContent() {
     setShowUpgradeModal(true);
   };
 
-  const claimDailyReward = () => {
-    // Simulate claiming reward
-    console.log('Daily reward claimed!');
+  const claimDailyReward = (dayNumber: number) => {
+    // Show claim modal with day number
+    setClaimedDay(dayNumber);
+    setShowClaimModal(true);
+    
+    // Auto-close after 2 seconds
+    setTimeout(() => {
+      setShowClaimModal(false);
+      setClaimedDay(null);
+    }, 2000);
   };
 
   return (
@@ -475,7 +484,7 @@ export default function RWATycoonContent() {
                       <CheckCircle className="w-6 h-6 text-green-400 mx-auto" />
                     ) : reward.isToday ? (
                       <button
-                        onClick={claimDailyReward}
+                        onClick={() => claimDailyReward(reward.day)}
                         className="w-full bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-white py-2 px-3 rounded-xl text-xs font-medium transition-all duration-300"
                       >
                         Claim
@@ -565,6 +574,147 @@ export default function RWATycoonContent() {
                   </>
                 );
               })()}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Claim Reward Modal */}
+      <AnimatePresence>
+        {showClaimModal && claimedDay && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+          >
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0, rotateY: -180 }}
+              animate={{ scale: 1, opacity: 1, rotateY: 0 }}
+              exit={{ scale: 0.5, opacity: 0, rotateY: 180 }}
+              transition={{ 
+                type: "spring", 
+                stiffness: 200, 
+                damping: 20,
+                duration: 0.6
+              }}
+              className="relative"
+            >
+              {/* Golden Glow Background */}
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/30 via-gold-500/40 to-yellow-600/30 rounded-full blur-3xl scale-150 animate-pulse" />
+              
+              {/* Main Modal */}
+              <div className="relative bg-gradient-to-br from-yellow-500/20 via-gold-500/30 to-yellow-600/20 backdrop-blur-xl border-2 border-gold-400/50 rounded-3xl p-8 text-center shadow-2xl">
+                {/* Sparkle Effects */}
+                <div className="absolute inset-0 overflow-hidden rounded-3xl">
+                  {[...Array(12)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ 
+                        scale: [0, 1, 0], 
+                        opacity: [0, 1, 0],
+                        rotate: [0, 180, 360]
+                      }}
+                      transition={{ 
+                        duration: 2, 
+                        delay: i * 0.1,
+                        repeat: Infinity,
+                        repeatDelay: 1
+                      }}
+                      className="absolute w-2 h-2 bg-yellow-300 rounded-full"
+                      style={{
+                        left: `${10 + Math.random() * 80}%`,
+                        top: `${10 + Math.random() * 80}%`
+                      }}
+                    />
+                  ))}
+                </div>
+
+                {/* Trophy Icon with Animation */}
+                <motion.div
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ 
+                    type: "spring", 
+                    stiffness: 200, 
+                    delay: 0.2 
+                  }}
+                  className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-gold-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl"
+                >
+                  <motion.div
+                    animate={{ 
+                      rotate: [0, 10, -10, 0],
+                      scale: [1, 1.1, 1]
+                    }}
+                    transition={{ 
+                      duration: 1, 
+                      repeat: Infinity,
+                      repeatDelay: 0.5
+                    }}
+                  >
+                    <Trophy className="w-10 h-10 text-white" />
+                  </motion.div>
+                </motion.div>
+
+                {/* Day Number */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="text-6xl font-bold bg-gradient-to-r from-yellow-300 via-gold-400 to-yellow-500 bg-clip-text text-transparent mb-2"
+                >
+                  Day {claimedDay}
+                </motion.div>
+
+                {/* Claimed Text */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.6 }}
+                  className="text-2xl font-bold text-white mb-4"
+                >
+                  🎉 CLAIMED! 🎉
+                </motion.div>
+
+                {/* Reward Info */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.8 }}
+                  className="text-lg text-gold-200 font-medium"
+                >
+                  Daily Reward Secured!
+                </motion.div>
+
+                {/* Floating Coins Animation */}
+                <div className="absolute inset-0 pointer-events-none">
+                  {[...Array(8)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ y: 0, opacity: 1, scale: 0 }}
+                      animate={{ 
+                        y: -150, 
+                        opacity: 0, 
+                        scale: [0, 1, 0.8],
+                        rotate: Math.random() * 360 
+                      }}
+                      transition={{ 
+                        duration: 2, 
+                        delay: 0.3 + i * 0.1,
+                        ease: "easeOut"
+                      }}
+                      className="absolute"
+                      style={{
+                        left: `${20 + Math.random() * 60}%`,
+                        top: '70%'
+                      }}
+                    >
+                      <Coins className="w-6 h-6 text-yellow-400" />
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
             </motion.div>
           </motion.div>
         )}

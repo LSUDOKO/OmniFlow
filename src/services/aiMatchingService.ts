@@ -345,8 +345,88 @@ class AIMatchingService extends EventEmitter {
   }
 
   // Core AI Methods
-  async getInvestorProfile(investorId: string): Promise<InvestorProfile | null> {
-    return this.investorProfiles.get(investorId) || null;
+  async getInvestorProfile(id: string): Promise<InvestorProfile | undefined> {
+    return this.investorProfiles.get(id);
+  }
+
+  async createInvestorProfile(profileData: Partial<InvestorProfile>): Promise<InvestorProfile> {
+    const id = `investor_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    const newProfile: InvestorProfile = {
+      id,
+      walletAddress: profileData.walletAddress || `0x${Math.random().toString(16).substr(2, 40)}`,
+      name: profileData.name || `Investor ${id}`,
+      email: profileData.email || `${id}@example.com`,
+      createdAt: new Date().toISOString(),
+      lastActive: new Date().toISOString(),
+      preferences: profileData.preferences || {
+        assetTypes: ['real_estate'],
+        geographicPreferences: ['North America'],
+        investmentAmount: { min: 10000, max: 100000, preferred: 50000 },
+        timeHorizon: 'medium',
+        liquidityPreference: 'medium',
+        sustainabilityFocus: false,
+        technologyAdoption: 'moderate',
+        diversificationGoals: ['Geographic'],
+        excludedSectors: []
+      },
+      riskProfile: profileData.riskProfile || {
+        riskTolerance: 'moderate',
+        riskScore: 50,
+        volatilityTolerance: 50,
+        maxDrawdown: 15,
+        riskFactors: {
+          marketRisk: 50,
+          creditRisk: 50,
+          liquidityRisk: 50,
+          operationalRisk: 50,
+          regulatoryRisk: 50
+        }
+      },
+      investmentHistory: profileData.investmentHistory || [],
+      demographics: profileData.demographics || {
+        age: 35,
+        ageRange: '30-40',
+        location: { country: 'United States', region: 'North America', city: 'New York' },
+        occupation: 'Professional',
+        incomeRange: '$100k-$250k',
+        netWorth: '$500k-$1M',
+        investmentExperience: 'intermediate'
+      },
+      behaviorMetrics: profileData.behaviorMetrics || {
+        activityLevel: 50,
+        decisionSpeed: 'moderate',
+        researchDepth: 'moderate',
+        socialInfluence: 50,
+        contrarian: false,
+        portfolioTurnover: 2,
+        averageHoldingPeriod: 365
+      }
+    };
+
+    this.investorProfiles.set(id, newProfile);
+    this.emit('profileCreated', newProfile);
+    
+    return newProfile;
+  }
+
+  async updateInvestorProfile(id: string, updates: Partial<InvestorProfile>): Promise<InvestorProfile | null> {
+    const existingProfile = this.investorProfiles.get(id);
+    if (!existingProfile) {
+      return null;
+    }
+
+    const updatedProfile: InvestorProfile = {
+      ...existingProfile,
+      ...updates,
+      id, // Ensure ID doesn't change
+      lastActive: new Date().toISOString()
+    };
+
+    this.investorProfiles.set(id, updatedProfile);
+    this.emit('profileUpdated', updatedProfile);
+    
+    return updatedProfile;
   }
 
   async getRecommendations(investorId: string, limit: number = 10): Promise<MatchingRecommendation[]> {

@@ -8,6 +8,8 @@ import {
   Text,
   Button,
   Input,
+  InputGroup,
+  InputLeftElement,
   Select,
   SimpleGrid,
   Card,
@@ -47,7 +49,7 @@ import {
   FiFilter,
   FiSearch,
   FiPlus,
-  FiBarChart3,
+  FiBarChart2,
   FiSettings,
 } from 'react-icons/fi';
 import { 
@@ -406,12 +408,16 @@ export default function AIMatchingDashboard() {
 
             <HStack w="full" spacing={4} flexWrap="wrap">
               <Box flex={1} minW="200px">
-                <Input
-                  placeholder="Search assets..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  leftElement={<Icon as={FiSearch} />}
-                />
+                <InputGroup>
+                  <InputLeftElement>
+                    <Icon as={FiSearch} />
+                  </InputLeftElement>
+                  <Input
+                    placeholder="Search assets..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </InputGroup>
               </Box>
               
               <Select
@@ -513,7 +519,7 @@ export default function AIMatchingDashboard() {
         <Tabs colorScheme="blue" variant="enclosed">
           <TabList>
             <Tab>
-              <Icon as={FiBarChart3} mr={2} />
+              <Icon as={FiBarChart2} mr={2} />
               Overview
             </Tab>
             <Tab>

@@ -125,6 +125,9 @@ export default function GovernanceContent() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedProposal, setSelectedProposal] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showVoteForModal, setShowVoteForModal] = useState(false);
+  const [showVoteAgainstModal, setShowVoteAgainstModal] = useState(false);
+  const [votedProposal, setVotedProposal] = useState<string>('');
   const { address, isConnected } = useAccount();
 
   const filteredProposals = governanceProposals.filter(proposal => {
@@ -146,6 +149,26 @@ export default function GovernanceContent() {
     
     if (days > 0) return `${days}d ${hours}h remaining`;
     return `${hours}h remaining`;
+  };
+
+  const handleVoteFor = (proposalTitle: string) => {
+    setVotedProposal(proposalTitle);
+    setShowVoteForModal(true);
+    
+    setTimeout(() => {
+      setShowVoteForModal(false);
+      setVotedProposal('');
+    }, 2000);
+  };
+
+  const handleVoteAgainst = (proposalTitle: string) => {
+    setVotedProposal(proposalTitle);
+    setShowVoteAgainstModal(true);
+    
+    setTimeout(() => {
+      setShowVoteAgainstModal(false);
+      setVotedProposal('');
+    }, 2000);
   };
 
   const getVotingProgress = (proposal: typeof governanceProposals[0]) => {
@@ -339,16 +362,118 @@ export default function GovernanceContent() {
               {getTimeRemaining(proposal.votingEnds)}
             </div>
             <div className="flex space-x-3">
-              <button className="px-6 py-2 bg-red-500/20 border border-red-400/50 text-red-300 rounded-xl hover:bg-red-500/30 transition-colors flex items-center">
+              <button 
+                onClick={() => handleVoteAgainst(proposal.title)}
+                className="px-6 py-2 bg-red-500/20 border border-red-400/50 text-red-300 rounded-xl hover:bg-red-500/30 transition-colors flex items-center"
+              >
                 <XCircle className="w-4 h-4 mr-2" />
                 Vote Against
               </button>
-              <button className="px-6 py-2 bg-green-500/20 border border-green-400/50 text-green-300 rounded-xl hover:bg-green-500/30 transition-colors flex items-center">
+              <button 
+                onClick={() => handleVoteFor(proposal.title)}
+                className="px-6 py-2 bg-green-500/20 border border-green-400/50 text-green-300 rounded-xl hover:bg-green-500/30 transition-colors flex items-center"
+              >
                 <CheckCircle className="w-4 h-4 mr-2" />
                 Vote For
               </button>
             </div>
           </div>
+        </motion.div>
+      </motion.div>
+    );
+  };
+
+  const VoteSuccessModal = ({ isVoteFor }: { isVoteFor: boolean }) => {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.8 }}
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className={`bg-gradient-to-br ${isVoteFor ? 'from-green-800 to-green-700' : 'from-red-800 to-red-700'} border-2 ${isVoteFor ? 'border-green-400/40' : 'border-red-400/40'} rounded-2xl p-8 max-w-md w-full text-center relative overflow-hidden`}
+        >
+          {/* Animated particles */}
+          {[...Array(8)].map((_, i) => (
+            <motion.div
+              key={i}
+              className={`absolute w-2 h-2 ${isVoteFor ? 'bg-green-400' : 'bg-red-400'} rounded-full`}
+              initial={{ 
+                x: Math.random() * 300 - 150,
+                y: Math.random() * 200 - 100,
+                opacity: 0,
+                scale: 0
+              }}
+              animate={{ 
+                x: Math.random() * 400 - 200,
+                y: Math.random() * 300 - 150,
+                opacity: [0, 1, 0],
+                scale: [0, 1, 0]
+              }}
+              transition={{ 
+                duration: 2,
+                delay: Math.random() * 0.5,
+                repeat: Infinity,
+                repeatDelay: 1
+              }}
+            />
+          ))}
+          
+          <div className="relative z-10">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              className={`w-16 h-16 ${isVoteFor ? 'bg-green-500' : 'bg-red-500'} rounded-full flex items-center justify-center mx-auto mb-4`}
+            >
+              {isVoteFor ? (
+                <CheckCircle className="w-8 h-8 text-white" />
+              ) : (
+                <XCircle className="w-8 h-8 text-white" />
+              )}
+            </motion.div>
+            
+            <motion.h2
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="text-2xl font-bold text-white mb-2"
+            >
+              {isVoteFor ? 'Vote Cast Successfully!' : 'Vote Against Recorded!'}
+            </motion.h2>
+            
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="text-gray-200 mb-4"
+            >
+              Your vote on "{votedProposal}" has been recorded on the blockchain.
+            </motion.p>
+            
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+              className="text-sm text-gray-300"
+            >
+              Thank you for participating in governance! 🗳️
+            </motion.div>
+          </div>
+          
+          {/* Corner decoration */}
+          <motion.div
+            initial={{ scale: 0, rotate: 0 }}
+            animate={{ scale: 1, rotate: 360 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+            className={`absolute top-4 right-4 w-6 h-6 ${isVoteFor ? 'text-green-300' : 'text-red-300'}`}
+          >
+            <Vote className="w-6 h-6" />
+          </motion.div>
         </motion.div>
       </motion.div>
     );
@@ -466,6 +591,15 @@ export default function GovernanceContent() {
       {/* Proposal Detail Modal */}
       <AnimatePresence>
         {selectedProposal && <ProposalDetail proposalId={selectedProposal} />}
+      </AnimatePresence>
+
+      {/* Vote Success Modals */}
+      <AnimatePresence>
+        {showVoteForModal && <VoteSuccessModal isVoteFor={true} />}
+      </AnimatePresence>
+      
+      <AnimatePresence>
+        {showVoteAgainstModal && <VoteSuccessModal isVoteFor={false} />}
       </AnimatePresence>
     </div>
   );

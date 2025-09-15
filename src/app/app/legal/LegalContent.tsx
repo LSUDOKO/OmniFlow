@@ -32,7 +32,11 @@ import {
   HelpCircle,
   Building,
   MapPin,
-  Calendar
+  Calendar,
+  X,
+  Send,
+  Upload,
+  Target
 } from 'lucide-react';
 
 const legalDocuments = [
@@ -179,6 +183,13 @@ export default function LegalContent() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('documents');
+  const [showLegalAIModal, setShowLegalAIModal] = useState(false);
+  const [showNewDocModal, setShowNewDocModal] = useState(false);
+  const [showDocSuccessModal, setShowDocSuccessModal] = useState(false);
+  const [showViewDetailsModal, setShowViewDetailsModal] = useState(false);
+  const [aiQuery, setAiQuery] = useState('');
+  const [newDocTitle, setNewDocTitle] = useState('');
+  const [selectedDocumentForDetails, setSelectedDocumentForDetails] = useState<typeof legalDocuments[0] | null>(null);
   const { address, isConnected } = useAccount();
 
   const filteredDocuments = legalDocuments.filter(doc => {
@@ -265,7 +276,14 @@ export default function LegalContent() {
             <Calendar className="w-3 h-3 mr-1" />
             Updated {document.lastUpdated}
           </div>
-          <button className="flex items-center text-blue-400 hover:text-blue-300 transition-colors">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedDocumentForDetails(document);
+              setShowViewDetailsModal(true);
+            }}
+            className="flex items-center text-blue-400 hover:text-blue-300 transition-colors"
+          >
             <span className="text-sm font-medium mr-1">View Details</span>
             <ArrowRight className="w-4 h-4" />
           </button>
@@ -366,6 +384,119 @@ export default function LegalContent() {
     );
   };
 
+  const handleAISubmit = () => {
+    setShowLegalAIModal(false);
+    setAiQuery('');
+  };
+
+  const handleNewDocSubmit = () => {
+    setShowNewDocModal(false);
+    setShowDocSuccessModal(true);
+    
+    setTimeout(() => {
+      setShowDocSuccessModal(false);
+      setNewDocTitle('');
+    }, 2000);
+  };
+
+  const LegalAIModal = () => {
+    return (
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        onClick={() => setShowLegalAIModal(false)}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          className="bg-gradient-to-br from-slate-800 to-slate-700 border-2 border-blue-400/40 rounded-2xl p-8 max-w-2xl w-full"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-600 rounded-xl flex items-center justify-center">
+                <Bot className="w-5 h-5 text-white" />
+              </div>
+              Legal AI Assistant
+            </h2>
+            <button
+              onClick={() => setShowLegalAIModal(false)}
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+
+          <div className="bg-blue-500/10 border border-blue-400/30 rounded-xl p-4 mb-6">
+            <div className="flex items-center gap-2 mb-2">
+              <HelpCircle className="w-5 h-5 text-blue-400" />
+              <span className="text-blue-300 font-medium">Ask Legal Questions</span>
+            </div>
+            <p className="text-sm text-gray-300">
+              Get instant answers about legal compliance, regulations, and document requirements
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Your Legal Question *
+              </label>
+              <textarea
+                rows={4}
+                value={aiQuery}
+                onChange={(e) => setAiQuery(e.target.value)}
+                placeholder="e.g., What are the SEC requirements for RWA tokenization?"
+                className="w-full px-4 py-3 bg-white/10 border-2 border-blue-400/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-blue-400/60 transition-colors resize-none"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <button 
+                onClick={() => setAiQuery('What are the key SEC regulations for tokenizing real estate assets?')}
+                className="p-3 bg-white/10 border border-blue-400/30 rounded-lg text-sm text-gray-300 hover:bg-blue-500/20 hover:text-blue-300 transition-colors text-left"
+              >
+                SEC Tokenization Rules
+              </button>
+              <button 
+                onClick={() => setAiQuery('What KYC/AML requirements apply to RWA platforms?')}
+                className="p-3 bg-white/10 border border-blue-400/30 rounded-lg text-sm text-gray-300 hover:bg-blue-500/20 hover:text-blue-300 transition-colors text-left"
+              >
+                KYC/AML Compliance
+              </button>
+              <button 
+                onClick={() => setAiQuery('How do I ensure GDPR compliance for EU investors?')}
+                className="p-3 bg-white/10 border border-blue-400/30 rounded-lg text-sm text-gray-300 hover:bg-blue-500/20 hover:text-blue-300 transition-colors text-left"
+              >
+                GDPR Requirements
+              </button>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-4 mt-8">
+            <button
+              onClick={() => setShowLegalAIModal(false)}
+              className="px-6 py-3 bg-gray-500/20 border border-gray-400/50 text-gray-300 rounded-xl hover:bg-gray-500/30 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleAISubmit}
+              disabled={!aiQuery.trim()}
+              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-medium transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Send className="w-4 h-4" />
+              Ask AI
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+    );
+  };
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -383,11 +514,17 @@ export default function LegalContent() {
           </p>
         </div>
         <div className="flex space-x-3">
-          <button className="px-4 py-2 bg-blue-500/20 border border-blue-400/50 text-blue-300 rounded-xl hover:bg-blue-500/30 transition-colors flex items-center gap-2">
+          <button 
+            onClick={() => setShowLegalAIModal(true)}
+            className="px-4 py-2 bg-blue-500/20 border border-blue-400/50 text-blue-300 rounded-xl hover:bg-blue-500/30 transition-colors flex items-center gap-2"
+          >
             <Bot className="w-4 h-4" />
             Legal AI
           </button>
-          <button className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-medium transition-all flex items-center gap-2">
+          <button 
+            onClick={() => setShowNewDocModal(true)}
+            className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-medium transition-all flex items-center gap-2"
+          >
             <Plus className="w-5 h-5" />
             New Document
           </button>
@@ -560,6 +697,350 @@ export default function LegalContent() {
                 </motion.div>
               ))}
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Legal AI Modal */}
+      <AnimatePresence>
+        {showLegalAIModal && <LegalAIModal />}
+      </AnimatePresence>
+
+      {/* New Document Modal */}
+      <AnimatePresence>
+        {showNewDocModal && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowNewDocModal(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-gradient-to-br from-slate-800 to-slate-700 border-2 border-blue-400/40 rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-600 rounded-xl flex items-center justify-center">
+                    <Plus className="w-5 h-5 text-white" />
+                  </div>
+                  Add New Legal Document
+                </h2>
+                <button
+                  onClick={() => setShowNewDocModal(false)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Document Title *
+                  </label>
+                  <input
+                    type="text"
+                    value={newDocTitle}
+                    onChange={(e) => setNewDocTitle(e.target.value)}
+                    placeholder="e.g., Investment Disclosure Agreement"
+                    className="w-full px-4 py-3 bg-white/10 border-2 border-blue-400/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-blue-400/60 transition-colors"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Document Type
+                    </label>
+                    <select className="w-full px-4 py-3 bg-white/10 border-2 border-blue-400/30 rounded-xl text-white focus:outline-none focus:border-blue-400/60 transition-colors">
+                      <option value="">Select Type</option>
+                      <option value="agreement">Agreement</option>
+                      <option value="policy">Policy</option>
+                      <option value="contract">Contract</option>
+                      <option value="disclosure">Disclosure</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Category
+                    </label>
+                    <select className="w-full px-4 py-3 bg-white/10 border-2 border-blue-400/30 rounded-xl text-white focus:outline-none focus:border-blue-400/60 transition-colors">
+                      <option value="">Select Category</option>
+                      <option value="platform">Platform</option>
+                      <option value="data">Data & Privacy</option>
+                      <option value="investment">Investment</option>
+                      <option value="compliance">Compliance</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <Target className="w-4 h-4 inline mr-1" />
+                    Document Description
+                  </label>
+                  <textarea
+                    rows={4}
+                    placeholder="Describe the purpose and key provisions of this legal document..."
+                    className="w-full px-4 py-3 bg-white/10 border-2 border-blue-400/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-blue-400/60 transition-colors resize-none"
+                  />
+                </div>
+
+                <div className="bg-blue-500/10 border border-blue-400/30 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Upload className="w-5 h-5 text-blue-400" />
+                    <span className="text-blue-300 font-medium">Document Upload</span>
+                  </div>
+                  <p className="text-sm text-gray-300 mb-3">
+                    Upload the legal document file (PDF, DOCX, or TXT)
+                  </p>
+                  <button className="px-4 py-2 bg-blue-500/20 border border-blue-400/50 text-blue-300 rounded-lg hover:bg-blue-500/30 transition-colors text-sm">
+                    Choose File
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-4 mt-8">
+                <button
+                  onClick={() => setShowNewDocModal(false)}
+                  className="px-6 py-3 bg-gray-500/20 border border-gray-400/50 text-gray-300 rounded-xl hover:bg-gray-500/30 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleNewDocSubmit}
+                  disabled={!newDocTitle.trim()}
+                  className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-medium transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Document
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Document Success Modal */}
+      <AnimatePresence>
+        {showDocSuccessModal && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="bg-gradient-to-br from-blue-800 to-purple-700 border-2 border-blue-400/50 rounded-2xl p-8 max-w-md w-full text-center relative overflow-hidden"
+            >
+              {[...Array(8)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-2 h-2 bg-blue-400 rounded-full"
+                  initial={{
+                    x: Math.random() * 300 - 150,
+                    y: Math.random() * 200 - 100,
+                    opacity: 0,
+                    scale: 0
+                  }}
+                  animate={{
+                    x: Math.random() * 400 - 200,
+                    y: Math.random() * 300 - 150,
+                    opacity: [0, 1, 0],
+                    scale: [0, 1, 0]
+                  }}
+                  transition={{
+                    duration: 2,
+                    delay: Math.random() * 0.5,
+                    repeat: Infinity,
+                    repeatDelay: 1
+                  }}
+                />
+              ))}
+
+              <motion.div
+                className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              >
+                <CheckCircle className="w-8 h-8 text-white" />
+              </motion.div>
+
+              <motion.h2
+                className="text-2xl font-bold text-white mb-2"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                Document Added Successfully!
+              </motion.h2>
+
+              <motion.p
+                className="text-blue-200 mb-4"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+              >
+                {newDocTitle ? `"${newDocTitle}"` : 'Your new document'} has been added to the legal framework.
+              </motion.p>
+
+              <motion.div
+                className="text-sm text-blue-300"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
+              >
+                Ready for compliance review! ⚖️
+              </motion.div>
+
+              <motion.div
+                className="absolute top-4 right-4 w-6 h-6 text-blue-300"
+                initial={{ scale: 0, rotate: 0 }}
+                animate={{ scale: 1, rotate: 360 }}
+                transition={{ delay: 0.3, duration: 0.8 }}
+              >
+                <Scale className="w-6 h-6" />
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* View Details Modal */}
+      <AnimatePresence>
+        {showViewDetailsModal && selectedDocumentForDetails && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowViewDetailsModal(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-gradient-to-br from-slate-800 to-slate-700 border-2 border-blue-400/40 rounded-2xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-start mb-6">
+                <div className="flex items-center space-x-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-600 rounded-2xl flex items-center justify-center">
+                    <Scale className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-3xl font-bold text-white mb-2">{selectedDocumentForDetails.title}</h2>
+                    <p className="text-blue-300 text-lg">{selectedDocumentForDetails.type} • v{selectedDocumentForDetails.version}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowViewDetailsModal(false)}
+                  className="text-gray-400 hover:text-white transition-colors text-2xl"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div className="bg-white/10 rounded-xl p-6 text-center">
+                  <div className={`text-2xl font-bold ${getStatusColor(selectedDocumentForDetails.status)} mb-1`}>
+                    {selectedDocumentForDetails.status.toUpperCase()}
+                  </div>
+                  <div className="text-xs text-gray-400">Status</div>
+                </div>
+                <div className="bg-white/10 rounded-xl p-6 text-center">
+                  <div className="text-2xl font-bold text-blue-400 mb-1">v{selectedDocumentForDetails.version}</div>
+                  <div className="text-xs text-gray-400">Version</div>
+                </div>
+                <div className="bg-white/10 rounded-xl p-6 text-center">
+                  <div className={`text-2xl font-bold ${getRiskColor(selectedDocumentForDetails.riskLevel)} mb-1`}>
+                    {selectedDocumentForDetails.riskLevel}
+                  </div>
+                  <div className="text-xs text-gray-400">Risk Level</div>
+                </div>
+                <div className="bg-white/10 rounded-xl p-6 text-center">
+                  <div className="text-2xl font-bold text-purple-400 mb-1">{selectedDocumentForDetails.compliance.length}</div>
+                  <div className="text-xs text-gray-400">Compliance</div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="bg-white/10 rounded-xl p-6">
+                  <h3 className="text-lg font-bold text-white mb-4 flex items-center">
+                    <FileText className="w-5 h-5 text-blue-400 mr-2" />
+                    Document Overview
+                  </h3>
+                  <p className="text-gray-300 text-sm mb-4">{selectedDocumentForDetails.description}</p>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">Category:</span>
+                      <span className="text-white capitalize">{selectedDocumentForDetails.category}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">Last Updated:</span>
+                      <span className="text-white">{selectedDocumentForDetails.lastUpdated}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white/10 rounded-xl p-6">
+                  <h3 className="text-lg font-bold text-white mb-4 flex items-center">
+                    <Shield className="w-5 h-5 text-green-400 mr-2" />
+                    Compliance Framework
+                  </h3>
+                  <div className="space-y-2">
+                    {selectedDocumentForDetails.compliance.map((comp, index) => (
+                      <div key={index} className="flex items-center text-gray-300">
+                        <CheckCircle className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />
+                        {comp}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white/10 rounded-xl p-6 mb-6">
+                <h3 className="text-lg font-bold text-white mb-4 flex items-center">
+                  <Info className="w-5 h-5 text-yellow-400 mr-2" />
+                  Key Provisions
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {selectedDocumentForDetails.keyPoints.map((point, index) => (
+                    <div key={index} className="flex items-start text-gray-300">
+                      <Star className="w-4 h-4 text-yellow-400 mr-2 flex-shrink-0 mt-0.5" />
+                      {point}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <div className="flex items-center text-sm text-gray-400">
+                  <Globe className="w-4 h-4 text-blue-400 mr-2" />
+                  Legal document verified and compliant
+                </div>
+                <div className="flex space-x-3">
+                  <button className="px-6 py-2 bg-blue-500/20 border border-blue-400/50 text-blue-300 rounded-xl hover:bg-blue-500/30 transition-colors flex items-center">
+                    <Download className="w-4 h-4 mr-2" />
+                    Download
+                  </button>
+                  <button className="px-6 py-2 bg-purple-500/20 border border-purple-400/50 text-purple-300 rounded-xl hover:bg-purple-500/30 transition-colors flex items-center">
+                    <Eye className="w-4 h-4 mr-2" />
+                    Review
+                  </button>
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

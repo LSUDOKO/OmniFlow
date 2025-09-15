@@ -108,6 +108,9 @@ export default function YieldVaultsContent() {
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [actionType, setActionType] = useState<'deposit' | 'withdraw'>('deposit');
   const [showModal, setShowModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [selectedInfoVault, setSelectedInfoVault] = useState<string | null>(null);
 
   const handleVaultAction = (vaultId: string, action: 'deposit' | 'withdraw') => {
     setSelectedVault(vaultId);
@@ -115,10 +118,19 @@ export default function YieldVaultsContent() {
     setShowModal(true);
   };
 
+  const handleInfoClick = (vaultId: string) => {
+    setSelectedInfoVault(vaultId);
+    setShowInfoModal(true);
+  };
+
   const executeTransaction = async () => {
     // Simulate transaction
+    setShowModal(false);
+    setShowSuccessModal(true);
+    
+    // Auto-close success modal after 2 seconds
     setTimeout(() => {
-      setShowModal(false);
+      setShowSuccessModal(false);
       setDepositAmount('');
       setWithdrawAmount('');
     }, 2000);
@@ -273,7 +285,10 @@ export default function YieldVaultsContent() {
                     Withdraw
                   </button>
                 )}
-                <button className="px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300">
+                <button 
+                  onClick={() => handleInfoClick(vault.id)}
+                  className="px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300"
+                >
                   <Info className="w-4 h-4 text-gray-400" />
                 </button>
               </div>
@@ -396,6 +411,283 @@ export default function YieldVaultsContent() {
           <p className="text-gray-400 text-sm">Live performance monitoring and yield analytics</p>
         </GlassCard>
       </motion.div>
+
+      {/* Success Modal */}
+      <AnimatePresence>
+        {showSuccessModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0, y: 20 }}
+              className="bg-gradient-to-br from-slate-900 to-slate-800 border border-gold-400/30 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl text-center"
+            >
+              {/* Happy Animation */}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                className="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6"
+              >
+                <motion.div
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 0.6, repeat: 2 }}
+                >
+                  <CheckCircle className="w-10 h-10 text-white" />
+                </motion.div>
+              </motion.div>
+
+              {/* Success Message */}
+              <motion.h3
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="text-2xl font-bold text-white mb-2"
+              >
+                🎉 {actionType === 'deposit' ? 'Deposited' : 'Withdrawn'} Successfully!
+              </motion.h3>
+              
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="text-gray-400 mb-4"
+              >
+                Your {actionType === 'deposit' ? 'deposit has been processed and you\'re earning yield!' : 'withdrawal has been processed successfully!'}
+              </motion.p>
+
+              {/* Amount Display */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.6 }}
+                className="bg-slate-800/50 rounded-xl p-4 mb-4"
+              >
+                <div className="text-gold-400 font-bold text-xl">
+                  {actionType === 'deposit' ? depositAmount : withdrawAmount} USDC
+                </div>
+                <div className="text-sm text-gray-400">
+                  {yieldVaults.find(v => v.id === selectedVault)?.name}
+                </div>
+              </motion.div>
+
+              {/* Confetti Effect */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="absolute inset-0 pointer-events-none"
+              >
+                {[...Array(6)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ y: 0, opacity: 1, scale: 0 }}
+                    animate={{ 
+                      y: -100, 
+                      opacity: 0, 
+                      scale: 1,
+                      rotate: Math.random() * 360 
+                    }}
+                    transition={{ 
+                      duration: 1.5, 
+                      delay: 0.5 + i * 0.1,
+                      ease: "easeOut"
+                    }}
+                    className="absolute w-3 h-3 bg-gold-400 rounded-full"
+                    style={{
+                      left: `${20 + Math.random() * 60}%`,
+                      top: '50%'
+                    }}
+                  />
+                ))}
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Info Modal */}
+      <AnimatePresence>
+        {showInfoModal && selectedInfoVault && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+            onClick={() => setShowInfoModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-gradient-to-br from-slate-900 to-slate-800 border border-gold-400/30 rounded-2xl p-8 max-w-2xl w-full mx-4 shadow-2xl max-h-[80vh] overflow-y-auto"
+            >
+              {(() => {
+                const vault = yieldVaults.find(v => v.id === selectedInfoVault);
+                if (!vault) return null;
+
+                return (
+                  <>
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center space-x-4">
+                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${vault.color} flex items-center justify-center`}>
+                          <Target className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="text-2xl font-bold text-white">{vault.name}</h3>
+                          <p className="text-gray-400">{vault.description}</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowInfoModal(false)}
+                        className="text-gray-400 hover:text-white transition-colors"
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    {/* Key Metrics */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                      <div className="bg-white/5 rounded-xl p-4 text-center">
+                        <div className="text-2xl font-bold text-green-400">{vault.apy}%</div>
+                        <div className="text-sm text-gray-400">APY</div>
+                      </div>
+                      <div className="bg-white/5 rounded-xl p-4 text-center">
+                        <div className="text-2xl font-bold text-blue-400">{vault.tvl}</div>
+                        <div className="text-sm text-gray-400">TVL</div>
+                      </div>
+                      <div className="bg-white/5 rounded-xl p-4 text-center">
+                        <div className={`text-2xl font-bold ${vault.riskColor}`}>{vault.risk}</div>
+                        <div className="text-sm text-gray-400">Risk</div>
+                      </div>
+                      <div className="bg-white/5 rounded-xl p-4 text-center">
+                        <div className="text-2xl font-bold text-gold-400">{vault.lockPeriod}</div>
+                        <div className="text-sm text-gray-400">Lock Period</div>
+                      </div>
+                    </div>
+
+                    {/* Asset Composition */}
+                    <div className="mb-6">
+                      <h4 className="text-lg font-bold text-white mb-4">Asset Composition</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        {vault.assets.map((asset, index) => (
+                          <div key={index} className="bg-white/5 rounded-lg p-3 text-center">
+                            <div className="text-white font-medium">{asset}</div>
+                            <div className="text-sm text-gray-400">
+                              {index === 0 ? '40%' : index === 1 ? '35%' : '25%'}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Your Position */}
+                    <div className="mb-6">
+                      <h4 className="text-lg font-bold text-white mb-4">Your Position</h4>
+                      <div className="bg-white/5 rounded-xl p-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <div className="text-sm text-gray-400">Deposited</div>
+                            <div className="text-xl font-bold text-white">{vault.userDeposit}</div>
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-400">Shares</div>
+                            <div className="text-xl font-bold text-blue-400">{vault.userShares}</div>
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-400">Earned</div>
+                            <div className="text-xl font-bold text-green-400">+{vault.earned}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Risk Information */}
+                    <div className="mb-6">
+                      <h4 className="text-lg font-bold text-white mb-4">Risk Information</h4>
+                      <div className="bg-white/5 rounded-xl p-4">
+                        <div className="flex items-start space-x-3">
+                          <AlertTriangle className={`w-5 h-5 mt-0.5 ${vault.riskColor}`} />
+                          <div>
+                            <div className="text-white font-medium mb-2">
+                              {vault.risk} Risk Strategy
+                            </div>
+                            <div className="text-sm text-gray-400 leading-relaxed">
+                              {vault.risk === 'Low' && 'Conservative approach with stable, government-backed assets. Lower volatility with steady returns.'}
+                              {vault.risk === 'Medium' && 'Balanced portfolio with diversified exposure. Moderate volatility with competitive yields.'}
+                              {vault.risk === 'High' && 'Aggressive strategy targeting maximum returns. Higher volatility and potential for significant gains or losses.'}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Terms & Conditions */}
+                    <div className="mb-6">
+                      <h4 className="text-lg font-bold text-white mb-4">Terms & Conditions</h4>
+                      <div className="bg-white/5 rounded-xl p-4 space-y-3">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-400">Minimum Deposit:</span>
+                          <span className="text-white">{vault.minDeposit}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-400">Lock Period:</span>
+                          <span className="text-white">{vault.lockPeriod}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-400">Management Fee:</span>
+                          <span className="text-white">2% annually</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-400">Performance Fee:</span>
+                          <span className="text-white">20% of profits</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-400">Early Withdrawal:</span>
+                          <span className="text-white">5% penalty fee</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex space-x-4">
+                      <button
+                        onClick={() => {
+                          setShowInfoModal(false);
+                          handleVaultAction(vault.id, 'deposit');
+                        }}
+                        className="flex-1 bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-white py-3 px-6 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Deposit
+                      </button>
+                      {vault.userDeposit !== '0 USDC' && (
+                        <button
+                          onClick={() => {
+                            setShowInfoModal(false);
+                            handleVaultAction(vault.id, 'withdraw');
+                          }}
+                          className="flex-1 bg-white/10 hover:bg-white/20 border border-white/20 text-white py-3 px-6 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2"
+                        >
+                          <Minus className="w-4 h-4" />
+                          Withdraw
+                        </button>
+                      )}
+                    </div>
+                  </>
+                );
+              })()}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

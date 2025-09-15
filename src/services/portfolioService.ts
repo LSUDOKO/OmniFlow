@@ -118,12 +118,119 @@ export interface ExportOptions {
   includeAllocation: boolean;
 }
 
+export interface RWAAssetPurchase {
+  id: string;
+  name: string;
+  type: string;
+  category: string;
+  tokensPurchased: number;
+  pricePerToken: number;
+  apy: number;
+  location: string;
+  solanaProgram: string;
+  mintAddress: string;
+  transactionHash?: string;
+}
+
+export interface PurchasedRWAAsset {
+  id: string;
+  name: string;
+  type: string;
+  category: string;
+  tokensPurchased: number;
+  pricePerToken: number;
+  totalInvested: number;
+  currentPrice: number;
+  currentValue: number;
+  apy: number;
+  location: string;
+  solanaProgram: string;
+  mintAddress: string;
+  purchaseDate: string;
+  transactionHash?: string;
+  status: 'active' | 'sold' | 'locked';
+}
+
 class PortfolioService {
   private walletAddress: string = '';
   private apiKey: string = process.env.NEXT_PUBLIC_PORTFOLIO_API_KEY || '';
+  private purchasedRWAAssets: Map<string, PurchasedRWAAsset> = new Map();
 
   setWalletAddress(address: string) {
     this.walletAddress = address;
+  }
+
+  // RWA Asset Purchase Tracking
+  addPurchasedRWAAsset(asset: RWAAssetPurchase): void {
+    console.log('Adding purchased RWA asset:', asset.name, 'Wallet:', this.walletAddress);
+    
+    if (!this.walletAddress) {
+      console.error('No wallet address set when trying to add purchased asset');
+      return;
+    }
+    
+    const purchasedAsset: PurchasedRWAAsset = {
+      id: asset.id,
+      name: asset.name,
+      type: asset.type,
+      category: asset.category,
+      tokensPurchased: asset.tokensPurchased,
+      pricePerToken: asset.pricePerToken,
+      totalInvested: asset.tokensPurchased * asset.pricePerToken,
+      currentPrice: asset.pricePerToken, // Initially same as purchase price
+      currentValue: asset.tokensPurchased * asset.pricePerToken,
+      apy: asset.apy,
+      location: asset.location,
+      solanaProgram: asset.solanaProgram,
+      mintAddress: asset.mintAddress,
+      purchaseDate: new Date().toISOString(),
+      transactionHash: asset.transactionHash,
+      status: 'active'
+    };
+
+    this.purchasedRWAAssets.set(asset.id, purchasedAsset);
+    console.log('Asset added to map, total assets:', this.purchasedRWAAssets.size);
+    
+    // Save to localStorage for persistence
+    this.savePurchasedAssetsToStorage();
+  }
+
+  getPurchasedRWAAssets(): PurchasedRWAAsset[] {
+    this.loadPurchasedAssetsFromStorage();
+    const assets = Array.from(this.purchasedRWAAssets.values());
+    console.log('Getting purchased RWA assets:', assets.length, 'for wallet:', this.walletAddress);
+    return assets;
+  }
+
+  getPurchasedRWAAsset(assetId: string): PurchasedRWAAsset | undefined {
+    this.loadPurchasedAssetsFromStorage();
+    return this.purchasedRWAAssets.get(assetId);
+  }
+
+  private savePurchasedAssetsToStorage(): void {
+    if (typeof window !== 'undefined' && this.walletAddress) {
+      const assetsArray = Array.from(this.purchasedRWAAssets.entries());
+      const storageKey = `omniflow_rwa_assets_${this.walletAddress}`;
+      localStorage.setItem(storageKey, JSON.stringify(assetsArray));
+      console.log('Saved assets to storage:', storageKey, assetsArray.length);
+    }
+  }
+
+  private loadPurchasedAssetsFromStorage(): void {
+    if (typeof window !== 'undefined' && this.walletAddress) {
+      const storageKey = `omniflow_rwa_assets_${this.walletAddress}`;
+      const stored = localStorage.getItem(storageKey);
+      console.log('Loading assets from storage:', storageKey, stored ? 'found' : 'not found');
+      if (stored) {
+        try {
+          const assetsArray = JSON.parse(stored);
+          this.purchasedRWAAssets = new Map(assetsArray);
+          console.log('Loaded assets from storage:', assetsArray.length);
+        } catch (error) {
+          console.error('Error loading purchased RWA assets from storage:', error);
+        }
+      }
+    }
   }
 
   // Portfolio Performance Calculations
@@ -131,11 +238,56 @@ class PortfolioService {
     try {
       // In production, this would fetch from blockchain and APIs
       const mockData = this.generateMockPortfolioData();
+      
+      // Add purchased RWA assets to the portfolio
+      const purchasedRWAs = this.getPurchasedRWAAssets();
+      const rwaPortfolioAssets = this.convertRWAToPortfolioAssets(purchasedRWAs);
+      
+      // Merge with existing mock assets
+      mockData.assets = [...mockData.assets, ...rwaPortfolioAssets];
+      
+      // Recalculate performance with RWA assets included
+      mockData.performance = this.calculatePortfolioPerformance(mockData.assets, mockData.dividends);
+      mockData.assetAllocation = this.calculateAssetAllocation(mockData.assets);
+      mockData.geographicAllocation = this.calculateGeographicAllocation(mockData.assets);
+      
       return mockData;
     } catch (error) {
       console.error('Error fetching portfolio analytics:', error);
       throw error;
     }
+  }
+
+  private convertRWAToPortfolioAssets(rwaAssets: PurchasedRWAAsset[]): PortfolioAsset[] {
+    return rwaAssets.map(rwa => {
+      // Simulate price changes for demo (in production, fetch from blockchain/oracles)
+      const priceChange = (Math.random() - 0.5) * 0.2; // -10% to +10%
+      const currentPrice = rwa.pricePerToken * (1 + priceChange);
+      const currentValue = rwa.tokensPurchased * currentPrice;
+      const unrealizedGainLoss = currentValue - rwa.totalInvested;
+      const unrealizedGainLossPercentage = (unrealizedGainLoss / rwa.totalInvested) * 100;
+
+      return {
+        id: rwa.id,
+        name: rwa.name,
+        symbol: `RWA-${rwa.id.slice(-3).toUpperCase()}`,
+        assetType: rwa.type,
+        shares: rwa.tokensPurchased,
+        totalShares: rwa.tokensPurchased * 10, // Assume 10% ownership for demo
+        ownershipPercentage: 10,
+        purchasePrice: rwa.pricePerToken,
+        currentPrice,
+        totalValue: currentValue,
+        unrealizedGainLoss,
+        unrealizedGainLossPercentage,
+        purchaseDate: rwa.purchaseDate,
+        lastUpdated: new Date().toISOString(),
+        dividendYield: rwa.apy,
+        annualDividends: currentValue * (rwa.apy / 100),
+        location: rwa.location,
+        esgScore: rwa.category === 'environmental' ? 95 : rwa.category === 'energy' ? 85 : 75
+      };
+    });
   }
 
   calculatePortfolioPerformance(assets: PortfolioAsset[], dividends: DividendPayment[]): PortfolioPerformance {

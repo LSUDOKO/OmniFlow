@@ -18,6 +18,8 @@ interface OnboardingData {
   hasIdentityNFT?: boolean;
   userInfo?: any;
   seedless?: boolean;
+  walletConnected?: boolean;
+  verificationLevel?: string;
   completedSteps: string[];
 }
 
@@ -86,9 +88,9 @@ export const Web3OnboardingProvider: React.FC<Web3OnboardingProviderProps> = ({ 
     }
   }, [isConnected, wallet, user]);
 
-  // Handle Web3Auth errors
+  // Handle Web3Auth errors - only show if user is actively onboarding or in app
   useEffect(() => {
-    if (web3AuthError) {
+    if (web3AuthError && (isOnboarding || window.location.pathname.startsWith('/app'))) {
       toast({
         title: 'Wallet Connection Error',
         description: web3AuthError,
@@ -96,7 +98,7 @@ export const Web3OnboardingProvider: React.FC<Web3OnboardingProviderProps> = ({ 
         duration: 5000,
       });
     }
-  }, [web3AuthError, toast]);
+  }, [web3AuthError, toast, isOnboarding]);
 
   const startOnboarding = () => {
     setIsOnboarding(true);

@@ -125,6 +125,72 @@ export default function DueDiligenceContent() {
     // Simulate AI analysis
     await new Promise(resolve => setTimeout(resolve, 3000));
     setIsAnalyzing(false);
+    // Force re-render by updating the asset's lastAnalyzed time
+    const asset = sampleAssets.find(a => a.id === assetId);
+    if (asset) {
+      asset.lastAnalyzed = 'Just now';
+    }
+  };
+
+  const downloadReport = (asset: typeof sampleAssets[0]) => {
+    // Create comprehensive report data
+    const reportData = {
+      assetName: asset.name,
+      assetType: asset.type,
+      location: asset.location,
+      value: asset.value,
+      analysisDate: new Date().toISOString(),
+      riskAssessment: {
+        overallRisk: getRiskLevel(asset.riskScore).label,
+        riskScore: asset.riskScore,
+        factors: [
+          'Market volatility, liquidity, and regulatory factors considered',
+          'Interest rate sensitivity may impact valuation',
+          'Market concentration in single geographic region',
+          'Potential for increased competition in local market',
+          'Regulatory changes could affect operating costs',
+          'Economic downturn may impact tenant demand'
+        ]
+      },
+      yieldProjection: {
+        projected: asset.yieldProjection,
+        conservative: asset.yieldProjection - 2,
+        optimistic: asset.yieldProjection + 3,
+        confidence: asset.confidence
+      },
+      esgScore: {
+        overall: asset.esgScore,
+        environmental: 85,
+        social: 78,
+        governance: 92
+      },
+      aiAnalysis: {
+        score: asset.aiScore,
+        summary: [
+          'Strong fundamentals with consistent cash flow generation',
+          'Location premium in high-demand metropolitan area',
+          'Well-diversified tenant base reducing vacancy risk',
+          'Recent renovations enhance long-term value proposition',
+          'Regulatory environment favorable for continued operations'
+        ]
+      }
+    };
+
+    // Convert to JSON and create downloadable file
+    const jsonString = JSON.stringify(reportData, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    // Create download link
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${asset.name.replace(/\s+/g, '_')}_Due_Diligence_Report.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up
+    URL.revokeObjectURL(url);
   };
 
   const AssetCard = ({ asset }: { asset: typeof sampleAssets[0] }) => {
@@ -333,7 +399,10 @@ export default function DueDiligenceContent() {
               Analysis completed {asset.lastAnalyzed}
             </div>
             <div className="flex space-x-3">
-              <button className="px-6 py-2 bg-blue-500/20 border border-blue-400/50 text-blue-300 rounded-xl hover:bg-blue-500/30 transition-colors flex items-center">
+              <button 
+                onClick={() => downloadReport(asset)}
+                className="px-6 py-2 bg-blue-500/20 border border-blue-400/50 text-blue-300 rounded-xl hover:bg-blue-500/30 transition-colors flex items-center"
+              >
                 <Download className="w-4 h-4 mr-2" />
                 Download Report
               </button>

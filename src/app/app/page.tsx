@@ -174,7 +174,7 @@ export default function AppPage() {
               <Gem className="w-7 h-7 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">OmniFlow</h1>
+              <h1 className="text-xl font-bold text-white">SolanaFlow</h1>
               <p className="text-xs text-gray-400">Universal RWA Platform</p>
             </div>
           </Link>

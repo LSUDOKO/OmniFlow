@@ -1,5 +1,4 @@
-import OpenAI from 'openai';
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export interface RWAAssetMetadata {
   name: string;
@@ -61,7 +60,7 @@ export interface AIDueDiligenceReport {
   id: string;
   assetId: string;
   generatedAt: Date;
-  aiProvider: 'openai' | 'claude';
+  aiProvider: 'gemini';
   
   // Core Analysis
   riskAssessment: RiskAssessment;
@@ -91,27 +90,23 @@ export interface AIDueDiligenceReport {
 }
 
 export class AIDueDiligenceService {
-  private openai?: OpenAI;
-  private anthropic?: Anthropic;
-  private preferredProvider: 'openai' | 'claude' = 'openai';
+  private genAI?: GoogleGenerativeAI;
+  private model?: any;
 
   constructor() {
-    // Initialize AI providers
-    if (process.env.OPENAI_API_KEY) {
-      this.openai = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
+    // Initialize Gemini
+    if (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY) {
+      const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+      this.genAI = new GoogleGenerativeAI(apiKey!);
+      this.model = this.genAI.getGenerativeModel({ 
+        model: "gemini-1.5-pro",
+        generationConfig: {
+          temperature: 0.3,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 2048,
+        },
       });
-    }
-    
-    if (process.env.ANTHROPIC_API_KEY) {
-      this.anthropic = new Anthropic({
-        apiKey: process.env.ANTHROPIC_API_KEY,
-      });
-    }
-
-    // Set preferred provider based on availability
-    if (this.anthropic && !this.openai) {
-      this.preferredProvider = 'claude';
     }
   }
 
@@ -122,28 +117,24 @@ export class AIDueDiligenceService {
     assetId: string, 
     metadata: RWAAssetMetadata,
     options: {
-      provider?: 'openai' | 'claude';
       includeMarketAnalysis?: boolean;
       includeESGAnalysis?: boolean;
       detailLevel?: 'basic' | 'comprehensive';
     } = {}
   ): Promise<AIDueDiligenceReport> {
-    const provider = options.provider || this.preferredProvider;
     const startTime = Date.now();
 
     try {
-      console.log(`🤖 Generating AI due diligence report for asset ${assetId} using ${provider.toUpperCase()}`);
+      console.log(`🤖 Generating AI due diligence report for asset ${assetId} using Gemini`);
 
       // Prepare analysis prompt
       const analysisPrompt = this.buildAnalysisPrompt(metadata, options);
       
       // Generate AI analysis
-      const aiAnalysis = provider === 'openai' 
-        ? await this.generateWithOpenAI(analysisPrompt)
-        : await this.generateWithClaude(analysisPrompt);
+      const aiAnalysis = await this.generateWithGemini(analysisPrompt);
 
       // Parse and structure the response
-      const report = await this.parseAIResponse(aiAnalysis, assetId, provider, metadata);
+      const report = await this.parseAIResponse(aiAnalysis, assetId, metadata);
       
       // Add performance metrics
       const processingTime = Date.now() - startTime;
@@ -176,12 +167,11 @@ Provide a JSON response with:
   "score": 0-1000,
   "factors": ["risk factor 1", "risk factor 2"],
   "mitigations": ["mitigation 1", "mitigation 2"]
-}`;
+}
 
-      const response = this.preferredProvider === 'openai'
-        ? await this.generateWithOpenAI(prompt, { maxTokens: 500 })
-        : await this.generateWithClaude(prompt, { maxTokens: 500 });
+Respond only with valid JSON, no additional text.`;
 
+      const response = await this.generateWithGemini(prompt, { maxTokens: 500 });
       return this.parseRiskAssessment(response);
     } catch (error) {
       console.error('Quick risk assessment failed:', error);
@@ -207,13 +197,12 @@ Provide ESG scores (0-100) and analysis:
   "overall": 0-100,
   "factors": ["key ESG factors"],
   "improvements": ["suggested improvements"]
-}`;
+}
+
+Respond only with valid JSON, no additional text.`;
 
     try {
-      const response = this.preferredProvider === 'openai'
-        ? await this.generateWithOpenAI(prompt, { maxTokens: 600 })
-        : await this.generateWithClaude(prompt, { maxTokens: 600 });
-
+      const response = await this.generateWithGemini(prompt, { maxTokens: 600 });
       return this.parseESGScore(response);
     } catch (error) {
       console.error('ESG scoring failed:', error);
@@ -239,13 +228,12 @@ Provide:
   "factors": ["yield factors"],
   "comparables": ["comparable assets"],
   "riskAdjustment": -10 to +10
-}`;
+}
+
+Respond only with valid JSON, no additional text.`;
 
     try {
-      const response = this.preferredProvider === 'openai'
-        ? await this.generateWithOpenAI(prompt, { maxTokens: 500 })
-        : await this.generateWithClaude(prompt, { maxTokens: 500 });
-
+      const response = await this.generateWithGemini(prompt, { maxTokens: 500 });
       return this.parseYieldProjection(response);
     } catch (error) {
       console.error('Yield projection failed:', error);
@@ -253,7 +241,7 @@ Provide:
     }
   }
 
-  // Private methods for AI provider integration
+  // Private methods for Gemini integration
   private buildAnalysisPrompt(metadata: RWAAssetMetadata, options: any): string {
     const detailLevel = options.detailLevel || 'comprehensive';
     
@@ -295,69 +283,81 @@ Focus on:
 - KYC/AML requirements based on asset value and type
 - Yield potential based on comparable assets and market conditions
 
-Response format: Valid JSON only, no additional text.`;
+IMPORTANT: Respond only with valid JSON, no additional text or formatting. Structure your response as:
+{
+  "riskAssessment": { "level": "", "score": 0, "factors": [], "mitigations": [] },
+  "yieldProjection": { "suggestedAPY": 0, "confidence": 0, "factors": [], "comparables": [], "riskAdjustment": 0 },
+  "esgScore": { "environmental": 0, "social": 0, "governance": 0, "overall": 0, "factors": [], "improvements": [] },
+  "kycRisk": { "level": "", "requirements": [], "redFlags": [], "verificationSteps": [], "estimatedTime": "" },
+  "jurisdiction": { "country": "", "riskLevel": "", "regulations": [], "compliance": [], "restrictions": [], "taxImplications": [] },
+  "executiveSummary": "",
+  "keyFindings": [],
+  "recommendations": [],
+  "overallConfidence": 0,
+  "dataQuality": "",
+  "limitations": [],
+  "regulatoryFlags": [],
+  "complianceScore": 0,
+  "marketComparables": [],
+  "liquidityAssessment": "",
+  "valuationRange": { "min": 0, "max": 0, "currency": "" }
+}`;
   }
 
-  private async generateWithOpenAI(prompt: string, options: { maxTokens?: number } = {}): Promise<string> {
-    if (!this.openai) {
-      throw new Error('OpenAI not configured');
+  private async generateWithGemini(prompt: string, options: { maxTokens?: number } = {}): Promise<string> {
+    if (!this.model) {
+      throw new Error('Gemini not configured. Please set GEMINI_API_KEY or GOOGLE_API_KEY environment variable');
     }
 
-    const response = await this.openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are an expert RWA due diligence analyst. Provide detailed, accurate analysis in valid JSON format only.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      max_tokens: options.maxTokens || 2000,
-      temperature: 0.3, // Lower temperature for more consistent analysis
-      response_format: { type: 'json_object' }
-    });
+    try {
+      // Update generation config if maxTokens is specified
+      if (options.maxTokens) {
+        const customModel = this.genAI!.getGenerativeModel({ 
+          model: "gemini-1.5-pro",
+          generationConfig: {
+            temperature: 0.3,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: options.maxTokens,
+          },
+        });
+        const result = await customModel.generateContent(prompt);
+        const response = await result.response;
+        return response.text();
+      }
 
-    return response.choices[0]?.message?.content || '{}';
-  }
-
-  private async generateWithClaude(prompt: string, options: { maxTokens?: number } = {}): Promise<string> {
-    if (!this.anthropic) {
-      throw new Error('Claude not configured');
+      const result = await this.model.generateContent(prompt);
+      const response = await result.response;
+      return response.text();
+    } catch (error) {
+      console.error('Gemini API error:', error);
+      throw error;
     }
-
-    const response = await this.anthropic.messages.create({
-      model: 'claude-3-sonnet-20240229',
-      max_tokens: options.maxTokens || 2000,
-      temperature: 0.3,
-      messages: [
-        {
-          role: 'user',
-          content: `${prompt}\n\nIMPORTANT: Respond with valid JSON only, no additional text or formatting.`
-        }
-      ]
-    });
-
-    const content = response.content[0];
-    return content.type === 'text' ? content.text : '{}';
   }
 
   private async parseAIResponse(
     aiResponse: string, 
     assetId: string, 
-    provider: 'openai' | 'claude',
     metadata: RWAAssetMetadata
   ): Promise<AIDueDiligenceReport> {
     try {
-      const parsed = JSON.parse(aiResponse);
+      // Clean the response to extract JSON
+      let cleanResponse = aiResponse.trim();
+      
+      // Remove markdown code blocks if present
+      if (cleanResponse.startsWith('```json')) {
+        cleanResponse = cleanResponse.replace(/```json\n?/, '').replace(/\n?```$/, '');
+      } else if (cleanResponse.startsWith('```')) {
+        cleanResponse = cleanResponse.replace(/```\n?/, '').replace(/\n?```$/, '');
+      }
+      
+      const parsed = JSON.parse(cleanResponse);
       
       return {
         id: `dd_${assetId}_${Date.now()}`,
         assetId,
         generatedAt: new Date(),
-        aiProvider: provider,
+        aiProvider: 'gemini',
         
         riskAssessment: parsed.riskAssessment || this.generateFallbackRiskAssessment(metadata),
         yieldProjection: parsed.yieldProjection || this.generateFallbackYieldProjection(metadata),
@@ -365,7 +365,7 @@ Response format: Valid JSON only, no additional text.`;
         kycRisk: parsed.kycRisk || this.generateFallbackKYCRisk(metadata),
         jurisdiction: parsed.jurisdiction || this.generateFallbackJurisdiction(metadata),
         
-        executiveSummary: parsed.executiveSummary || 'AI-generated analysis of RWA asset risk and opportunity profile.',
+        executiveSummary: parsed.executiveSummary || 'Gemini-generated analysis of RWA asset risk and opportunity profile.',
         keyFindings: parsed.keyFindings || ['Asset analysis completed', 'Risk factors identified', 'Yield projection calculated'],
         recommendations: parsed.recommendations || ['Proceed with enhanced due diligence', 'Monitor regulatory changes'],
         
@@ -385,7 +385,8 @@ Response format: Valid JSON only, no additional text.`;
         }
       };
     } catch (error) {
-      console.error('Failed to parse AI response:', error);
+      console.error('Failed to parse Gemini response:', error);
+      console.log('Raw response:', aiResponse);
       return this.generateFallbackReport(assetId, metadata);
     }
   }
@@ -393,14 +394,23 @@ Response format: Valid JSON only, no additional text.`;
   // Parsing helper methods
   private parseRiskAssessment(response: string): RiskAssessment {
     try {
-      const parsed = JSON.parse(response);
+      // Clean response similar to parseAIResponse
+      let cleanResponse = response.trim();
+      if (cleanResponse.startsWith('```json')) {
+        cleanResponse = cleanResponse.replace(/```json\n?/, '').replace(/\n?```$/, '');
+      } else if (cleanResponse.startsWith('```')) {
+        cleanResponse = cleanResponse.replace(/```\n?/, '').replace(/\n?```$/, '');
+      }
+      
+      const parsed = JSON.parse(cleanResponse);
       return {
         level: parsed.level || 'MEDIUM',
         score: parsed.score || 500,
         factors: parsed.factors || ['Limited data available'],
         mitigations: parsed.mitigations || ['Enhanced monitoring recommended']
       };
-    } catch {
+    } catch (error) {
+      console.error('Failed to parse risk assessment:', error);
       return {
         level: 'MEDIUM',
         score: 500,
@@ -412,7 +422,14 @@ Response format: Valid JSON only, no additional text.`;
 
   private parseESGScore(response: string): ESGScore {
     try {
-      const parsed = JSON.parse(response);
+      let cleanResponse = response.trim();
+      if (cleanResponse.startsWith('```json')) {
+        cleanResponse = cleanResponse.replace(/```json\n?/, '').replace(/\n?```$/, '');
+      } else if (cleanResponse.startsWith('```')) {
+        cleanResponse = cleanResponse.replace(/```\n?/, '').replace(/\n?```$/, '');
+      }
+      
+      const parsed = JSON.parse(cleanResponse);
       return {
         environmental: parsed.environmental || 50,
         social: parsed.social || 50,
@@ -421,7 +438,8 @@ Response format: Valid JSON only, no additional text.`;
         factors: parsed.factors || ['ESG analysis pending'],
         improvements: parsed.improvements || ['Enhance ESG reporting']
       };
-    } catch {
+    } catch (error) {
+      console.error('Failed to parse ESG score:', error);
       return {
         environmental: 50,
         social: 50,
@@ -435,7 +453,14 @@ Response format: Valid JSON only, no additional text.`;
 
   private parseYieldProjection(response: string): YieldProjection {
     try {
-      const parsed = JSON.parse(response);
+      let cleanResponse = response.trim();
+      if (cleanResponse.startsWith('```json')) {
+        cleanResponse = cleanResponse.replace(/```json\n?/, '').replace(/\n?```$/, '');
+      } else if (cleanResponse.startsWith('```')) {
+        cleanResponse = cleanResponse.replace(/```\n?/, '').replace(/\n?```$/, '');
+      }
+      
+      const parsed = JSON.parse(cleanResponse);
       return {
         suggestedAPY: parsed.suggestedAPY || 5.0,
         confidence: parsed.confidence || 0.6,
@@ -443,7 +468,8 @@ Response format: Valid JSON only, no additional text.`;
         comparables: parsed.comparables || ['Similar assets in market'],
         riskAdjustment: parsed.riskAdjustment || 0
       };
-    } catch {
+    } catch (error) {
+      console.error('Failed to parse yield projection:', error);
       return {
         suggestedAPY: 5.0,
         confidence: 0.5,
@@ -460,7 +486,7 @@ Response format: Valid JSON only, no additional text.`;
       id: `dd_${assetId}_${Date.now()}`,
       assetId,
       generatedAt: new Date(),
-      aiProvider: 'openai', // Default
+      aiProvider: 'gemini',
       
       riskAssessment: this.generateFallbackRiskAssessment(metadata),
       yieldProjection: this.generateFallbackYieldProjection(metadata),

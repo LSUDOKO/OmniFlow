@@ -129,6 +129,8 @@ export default function CertificatesContent() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedCertificate, setSelectedCertificate] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showBlockchainModal, setShowBlockchainModal] = useState(false);
+  const [blockchainCertificate, setBlockchainCertificate] = useState<typeof sampleCertificates[0] | null>(null);
   const { address, isConnected } = useAccount();
 
   const filteredCertificates = sampleCertificates.filter(cert => {
@@ -137,6 +139,62 @@ export default function CertificatesContent() {
                          cert.type.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
+
+  const downloadCertificate = (certificate: typeof sampleCertificates[0]) => {
+    // Create comprehensive certificate data
+    const certificateData = {
+      certificateId: certificate.id,
+      certificateName: certificate.name,
+      certificateType: certificate.type,
+      category: certificate.category,
+      issueDate: new Date().toISOString(),
+      financialDetails: {
+        value: certificate.value,
+        ownership: certificate.ownership,
+        riskLevel: certificate.riskLevel
+      },
+      timeline: {
+        issueDate: certificate.issueDate,
+        expiryDate: certificate.expiryDate,
+        lastUpdated: certificate.lastUpdated
+      },
+      verification: {
+        score: certificate.verificationScore,
+        issuer: certificate.issuer,
+        location: certificate.location,
+        status: certificate.status
+      },
+      description: certificate.description,
+      benefits: certificate.benefits,
+      blockchainInfo: {
+        network: 'Ethereum',
+        contractAddress: '0x' + Math.random().toString(16).substr(2, 40),
+        tokenId: Math.floor(Math.random() * 10000),
+        transactionHash: '0x' + Math.random().toString(16).substr(2, 64)
+      }
+    };
+
+    // Convert to JSON and create downloadable file
+    const jsonString = JSON.stringify(certificateData, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    // Create download link
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${certificate.name.replace(/\s+/g, '_')}_Certificate.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up
+    URL.revokeObjectURL(url);
+  };
+
+  const showBlockchainDetails = (certificate: typeof sampleCertificates[0]) => {
+    setBlockchainCertificate(certificate);
+    setShowBlockchainModal(true);
+  };
 
   const portfolioStats = {
     totalCertificates: sampleCertificates.length,
@@ -336,15 +394,141 @@ export default function CertificatesContent() {
               Certificate verified and active
             </div>
             <div className="flex space-x-3">
-              <button className="px-6 py-2 bg-blue-500/20 border border-blue-400/50 text-blue-300 rounded-xl hover:bg-blue-500/30 transition-colors flex items-center">
+              <button 
+                onClick={() => downloadCertificate(certificate)}
+                className="px-6 py-2 bg-blue-500/20 border border-blue-400/50 text-blue-300 rounded-xl hover:bg-blue-500/30 transition-colors flex items-center"
+              >
                 <Download className="w-4 h-4 mr-2" />
                 Download
               </button>
-              <button className="px-6 py-2 bg-purple-500/20 border border-purple-400/50 text-purple-300 rounded-xl hover:bg-purple-500/30 transition-colors flex items-center">
+              <button 
+                onClick={() => showBlockchainDetails(certificate)}
+                className="px-6 py-2 bg-purple-500/20 border border-purple-400/50 text-purple-300 rounded-xl hover:bg-purple-500/30 transition-colors flex items-center"
+              >
                 <Eye className="w-4 h-4 mr-2" />
                 View on Blockchain
               </button>
             </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    );
+  };
+
+  const BlockchainModal = () => {
+    if (!blockchainCertificate) return null;
+
+    const mockBlockchainData = {
+      network: 'Ethereum Mainnet',
+      contractAddress: '0x' + Math.random().toString(16).substr(2, 40),
+      tokenId: Math.floor(Math.random() * 10000),
+      transactionHash: '0x' + Math.random().toString(16).substr(2, 64),
+      blockNumber: Math.floor(Math.random() * 1000000) + 18000000,
+      gasUsed: '21,000',
+      gasPrice: '20 Gwei',
+      timestamp: new Date().toISOString(),
+      confirmations: Math.floor(Math.random() * 100) + 50
+    };
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        onClick={() => setShowBlockchainModal(false)}
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-br from-slate-800 to-slate-700 border-2 border-slate-400/40 rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-2">Blockchain Details</h2>
+              <p className="text-purple-300">{blockchainCertificate.name}</p>
+            </div>
+            <button
+              onClick={() => setShowBlockchainModal(false)}
+              className="text-gray-400 hover:text-white transition-colors text-xl"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="space-y-6">
+            <div className="bg-white/10 rounded-xl p-6">
+              <h3 className="text-lg font-bold text-white mb-4 flex items-center">
+                <Globe className="w-5 h-5 text-blue-400 mr-2" />
+                Network Information
+              </h3>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-300">Network</span>
+                  <span className="font-bold text-blue-400">{mockBlockchainData.network}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-300">Block Number</span>
+                  <span className="font-bold text-blue-400">{mockBlockchainData.blockNumber.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-300">Confirmations</span>
+                  <span className="font-bold text-green-400">{mockBlockchainData.confirmations}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white/10 rounded-xl p-6">
+              <h3 className="text-lg font-bold text-white mb-4 flex items-center">
+                <FileText className="w-5 h-5 text-purple-400 mr-2" />
+                Contract Details
+              </h3>
+              <div className="space-y-3">
+                <div>
+                  <span className="text-gray-300 block mb-1">Contract Address</span>
+                  <span className="font-mono text-sm text-purple-400 bg-white/10 px-3 py-1 rounded break-all">
+                    {mockBlockchainData.contractAddress}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-300">Token ID</span>
+                  <span className="font-bold text-purple-400">#{mockBlockchainData.tokenId}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white/10 rounded-xl p-6">
+              <h3 className="text-lg font-bold text-white mb-4 flex items-center">
+                <Zap className="w-5 h-5 text-gold-400 mr-2" />
+                Transaction Details
+              </h3>
+              <div className="space-y-3">
+                <div>
+                  <span className="text-gray-300 block mb-1">Transaction Hash</span>
+                  <span className="font-mono text-sm text-gold-400 bg-white/10 px-3 py-1 rounded break-all">
+                    {mockBlockchainData.transactionHash}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-300">Gas Used</span>
+                  <span className="font-bold text-gold-400">{mockBlockchainData.gasUsed}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-300">Gas Price</span>
+                  <span className="font-bold text-gold-400">{mockBlockchainData.gasPrice}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-center mt-8">
+            <button 
+              onClick={() => window.open(`https://etherscan.io/tx/${mockBlockchainData.transactionHash}`, '_blank')}
+              className="px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-xl font-medium transition-all flex items-center gap-2"
+            >
+              <Globe className="w-5 h-5" />
+              View on Etherscan
+            </button>
           </div>
         </motion.div>
       </motion.div>
@@ -472,6 +656,11 @@ export default function CertificatesContent() {
       {/* Certificate Detail Modal */}
       <AnimatePresence>
         {selectedCertificate && <CertificateDetail certificateId={selectedCertificate} />}
+      </AnimatePresence>
+
+      {/* Blockchain Details Modal */}
+      <AnimatePresence>
+        {showBlockchainModal && <BlockchainModal />}
       </AnimatePresence>
     </div>
   );

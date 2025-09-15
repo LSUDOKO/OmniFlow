@@ -171,6 +171,61 @@ export default function AnalyticsContent() {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     setIsLoading(false);
+    // Refresh the entire page
+    window.location.reload();
+  };
+
+  const exportData = () => {
+    // Prepare analytics data for export
+    const analyticsData = {
+      marketOverview: {
+        totalMarketCap: mockMarketData.totalMarketCap,
+        totalVolume24h: mockMarketData.totalVolume24h,
+        totalAssets: mockMarketData.totalAssets,
+        activeTraders: mockMarketData.activeTraders,
+        marketCapChange: mockMarketData.marketCapChange,
+        volumeChange: mockMarketData.volumeChange,
+        assetsChange: mockMarketData.assetsChange,
+        tradersChange: mockMarketData.tradersChange
+      },
+      assetTypes: mockAssetTypeData.map(asset => ({
+        type: asset.type,
+        name: asset.name,
+        marketCap: asset.marketCap,
+        volume24h: asset.volume24h,
+        assets: asset.assets,
+        avgYield: asset.avgYield,
+        change24h: asset.change24h
+      })),
+      chains: mockChainData.map(chain => ({
+        name: chain.name,
+        marketCap: chain.marketCap,
+        volume24h: chain.volume24h,
+        assets: chain.assets,
+        transactions: chain.transactions,
+        change24h: chain.change24h
+      })),
+      exportTimestamp: new Date().toISOString(),
+      timeframe: selectedTimeframe
+    };
+
+    // Convert to JSON string
+    const dataStr = JSON.stringify(analyticsData, null, 2);
+    
+    // Create blob and download
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    // Create download link
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `omniflow-analytics-${selectedTimeframe}-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up
+    URL.revokeObjectURL(url);
   };
 
   const MarketOverview = () => (
@@ -479,7 +534,10 @@ export default function AnalyticsContent() {
             <span>Refresh</span>
           </button>
           
-          <button className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-gold-500 to-gold-600 rounded-xl font-medium hover:from-gold-600 hover:to-gold-700 transition-all">
+          <button 
+            onClick={exportData}
+            className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-gold-500 to-gold-600 rounded-xl font-medium hover:from-gold-600 hover:to-gold-700 transition-all"
+          >
             <Download className="w-4 h-4" />
             <span>Export</span>
           </button>

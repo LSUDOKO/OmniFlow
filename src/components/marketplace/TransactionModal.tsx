@@ -28,7 +28,7 @@ interface TransactionModalProps {
   asset: Asset;
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => Promise<boolean>;
+  onConfirm: (amount: number) => Promise<boolean>;
 }
 
 export default function TransactionModal({
@@ -38,6 +38,7 @@ export default function TransactionModal({
   onConfirm,
 }: TransactionModalProps) {
   const [status, setStatus] = useState<'idle' | 'pending' | 'success' | 'failed'>('idle');
+  const [purchaseAmount, setPurchaseAmount] = useState(1);
 
   useEffect(() => {
     if (!isOpen) {
@@ -48,7 +49,7 @@ export default function TransactionModal({
 
   const handleConfirm = async () => {
     setStatus('pending');
-    const success = await onConfirm();
+    const success = await onConfirm(purchaseAmount);
     setStatus(success ? 'success' : 'failed');
   };
 
@@ -99,13 +100,37 @@ export default function TransactionModal({
                 <span className="text-gray-400">Asset:</span>
                 <span className="text-white font-medium">{asset.name}</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-400">Price:</span>
-                <span className="text-white font-bold text-lg">${asset.pricePerToken.toLocaleString()}</span>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-gray-400">Price per Token:</span>
+                <span className="text-white font-bold">${asset.pricePerToken.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-gray-400">Quantity:</span>
+                <div className="flex items-center space-x-2">
+                  <button 
+                    onClick={() => setPurchaseAmount(Math.max(1, purchaseAmount - 1))}
+                    className="w-8 h-8 bg-gray-600 hover:bg-gray-500 text-white rounded flex items-center justify-center"
+                  >
+                    -
+                  </button>
+                  <span className="text-white font-medium w-12 text-center">{purchaseAmount}</span>
+                  <button 
+                    onClick={() => setPurchaseAmount(Math.min(asset.available, purchaseAmount + 1))}
+                    className="w-8 h-8 bg-gray-600 hover:bg-gray-500 text-white rounded flex items-center justify-center"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+              <div className="border-t border-gray-600 pt-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400">Total Cost:</span>
+                  <span className="text-gold-400 font-bold text-xl">${(asset.pricePerToken * purchaseAmount).toLocaleString()}</span>
+                </div>
               </div>
             </div>
             <p className="text-xs text-gray-500 mb-6">
-              You are about to purchase 1 token of this asset. This is a mock transaction and no real funds will be used.
+              You are about to purchase {purchaseAmount} token{purchaseAmount > 1 ? 's' : ''} of this asset. This will be added to your portfolio automatically upon successful purchase.
             </p>
             <div className="flex justify-end gap-3">
               <button onClick={onClose} className="text-gray-400 hover:text-white">
@@ -113,9 +138,9 @@ export default function TransactionModal({
               </button>
               <button
                 onClick={handleConfirm}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg flex items-center gap-2"
+                className="bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 font-medium"
               >
-                Confirm <ArrowRight className="w-4 h-4" />
+                Purchase ${(asset.pricePerToken * purchaseAmount).toLocaleString()} <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>

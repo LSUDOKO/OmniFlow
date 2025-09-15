@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useWallet } from '../contexts/WalletContext';
 import { didIdentityService } from '../lib/did-identity';
-import { ethers } from 'ethers';
+import { ethers, Provider } from 'ethers';
 import { Connection, PublicKey } from '@solana/web3.js';
 
 // Types
@@ -60,7 +60,9 @@ const PASSPORT_CONTRACTS: Record<string, string> = {
 };
 
 export const useIdentityPassport = () => {
-  const { address, provider, chainId, solanaWallet } = useWallet();
+  const { address, provider } = useWallet();
+  const chainId = 1; // Default to Ethereum
+  const solanaWallet = null; // Mock for now
   const [passport, setPassport] = useState<IdentityPassportNFT | null>(null);
   const [metadata, setMetadata] = useState<PassportMetadata | null>(null);
   const [loading, setLoading] = useState(false);
@@ -82,7 +84,7 @@ export const useIdentityPassport = () => {
   const fetchEVMPassport = useCallback(async (
     userAddress: string,
     chain: string,
-    provider: ethers.providers.Provider
+    provider: any
   ): Promise<IdentityPassportNFT | null> => {
     try {
       const contractAddress = PASSPORT_CONTRACTS[chain];
@@ -109,8 +111,8 @@ export const useIdentityPassport = () => {
       const passport: IdentityPassportNFT = {
         tokenId: tokenId.toString(),
         did: passportData.did,
-        kycLevel: ['None', 'Basic', 'Enhanced', 'Institutional'][passportData.kycLevel],
-        investorTier: ['None', 'Retail', 'Accredited', 'Institutional', 'Qualified'][passportData.investorTier],
+        kycLevel: (['None', 'Basic', 'Enhanced', 'Institutional'][passportData.kycLevel] as 'None' | 'Basic' | 'Enhanced' | 'Institutional'),
+        investorTier: (['None', 'Retail', 'Accredited', 'Institutional', 'Qualified'][passportData.investorTier] as 'None' | 'Institutional' | 'Retail' | 'Accredited' | 'Qualified'),
         reputationScore: passportData.reputationScore.toNumber(),
         issuanceDate: new Date(passportData.issuanceDate.toNumber() * 1000),
         expirationDate: new Date(passportData.expirationDate.toNumber() * 1000),
@@ -233,7 +235,10 @@ export const useIdentityPassport = () => {
       // Try to fetch from current EVM chain first
       if (provider && chainId) {
         const chainName = getChainName(chainId);
-        foundPassport = await fetchEVMPassport(address, chainName, provider);
+        const passport = await fetchEVMPassport(address, chainName, provider as any);
+        if (passport) {
+          foundPassport = passport;
+        }
       }
 
       // If not found on current chain, try other EVM chains

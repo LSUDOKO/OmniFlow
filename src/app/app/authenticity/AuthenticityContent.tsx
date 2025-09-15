@@ -138,6 +138,8 @@ export default function AuthenticityContent() {
   const [selectedDocument, setSelectedDocument] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showUploader, setShowUploader] = useState(false);
+  const [showOriginalModal, setShowOriginalModal] = useState(false);
+  const [originalDocument, setOriginalDocument] = useState<typeof sampleDocuments[0] | null>(null);
   const { address, isConnected } = useAccount();
 
   const filteredDocuments = sampleDocuments.filter(doc => {
@@ -146,6 +148,61 @@ export default function AuthenticityContent() {
                          doc.type.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
+
+  const downloadDocument = (doc: typeof sampleDocuments[0]) => {
+    // Create comprehensive document data
+    const documentData = {
+      documentId: doc.id,
+      documentName: doc.name,
+      documentType: doc.type,
+      category: doc.category,
+      downloadDate: new Date().toISOString(),
+      fileInfo: {
+        format: doc.format,
+        size: doc.fileSize,
+        uploadDate: doc.uploadDate
+      },
+      verification: {
+        status: doc.verificationStatus,
+        confidenceScore: doc.confidenceScore,
+        lastVerified: doc.lastVerified,
+        methods: doc.verificationMethods
+      },
+      authenticity: doc.authenticity,
+      blockchain: {
+        hash: doc.blockchainHash,
+        network: 'Ethereum Mainnet',
+        contractAddress: '0x' + Math.random().toString(16).substr(2, 40),
+        timestamp: new Date().toISOString()
+      },
+      issuer: {
+        name: doc.issuer,
+        verified: true,
+        trustScore: 95
+      }
+    };
+
+    // Convert to JSON and create downloadable file
+    const jsonString = JSON.stringify(documentData, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    // Create download link
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${doc.name.replace(/\s+/g, '_')}_Authenticity_Report.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up
+    URL.revokeObjectURL(url);
+  };
+
+  const showOriginalDocument = (document: typeof sampleDocuments[0]) => {
+    setOriginalDocument(document);
+    setShowOriginalModal(true);
+  };
 
   const verificationStats = {
     totalDocuments: sampleDocuments.length,
@@ -353,15 +410,163 @@ export default function AuthenticityContent() {
               Document authenticity verified
             </div>
             <div className="flex space-x-3">
-              <button className="px-6 py-2 bg-blue-500/20 border border-blue-400/50 text-blue-300 rounded-xl hover:bg-blue-500/30 transition-colors flex items-center">
+              <button 
+                onClick={() => downloadDocument(document)}
+                className="px-6 py-2 bg-blue-500/20 border border-blue-400/50 text-blue-300 rounded-xl hover:bg-blue-500/30 transition-colors flex items-center"
+              >
                 <Download className="w-4 h-4 mr-2" />
                 Download
               </button>
-              <button className="px-6 py-2 bg-purple-500/20 border border-purple-400/50 text-purple-300 rounded-xl hover:bg-purple-500/30 transition-colors flex items-center">
+              <button 
+                onClick={() => showOriginalDocument(document)}
+                className="px-6 py-2 bg-purple-500/20 border border-purple-400/50 text-purple-300 rounded-xl hover:bg-purple-500/30 transition-colors flex items-center"
+              >
                 <Eye className="w-4 h-4 mr-2" />
                 View Original
               </button>
             </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    );
+  };
+
+  const OriginalDocumentModal = () => {
+    if (!originalDocument) return null;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        onClick={() => setShowOriginalModal(false)}
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-br from-slate-800 to-slate-700 border-2 border-slate-400/40 rounded-2xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-2">Original Document Preview</h2>
+              <p className="text-purple-300">{originalDocument.name}</p>
+            </div>
+            <button
+              onClick={() => setShowOriginalModal(false)}
+              className="text-gray-400 hover:text-white transition-colors text-xl"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="space-y-6">
+            {/* Document Preview Area */}
+            <div className="bg-white/10 rounded-xl p-8 min-h-[400px] flex items-center justify-center">
+              <div className="text-center">
+                <div className="w-24 h-24 bg-gradient-to-br from-blue-400 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <FileText className="w-12 h-12 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">{originalDocument.name}</h3>
+                <p className="text-gray-300 mb-4">Document Type: {originalDocument.type}</p>
+                <div className="bg-white/20 rounded-lg p-4 max-w-md mx-auto">
+                  <p className="text-sm text-gray-300 mb-2">This is a preview of the original document.</p>
+                  <p className="text-xs text-gray-400">Format: {originalDocument.format} • Size: {originalDocument.fileSize}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Document Metadata */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white/10 rounded-xl p-6">
+                <h3 className="text-lg font-bold text-white mb-4 flex items-center">
+                  <Info className="w-5 h-5 text-blue-400 mr-2" />
+                  Document Details
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">File Name</span>
+                    <span className="font-bold text-blue-400">{originalDocument.name}.{originalDocument.format.toLowerCase()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Upload Date</span>
+                    <span className="font-bold text-blue-400">{originalDocument.uploadDate}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">File Size</span>
+                    <span className="font-bold text-blue-400">{originalDocument.fileSize}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Issuer</span>
+                    <span className="font-bold text-blue-400 text-sm">{originalDocument.issuer}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white/10 rounded-xl p-6">
+                <h3 className="text-lg font-bold text-white mb-4 flex items-center">
+                  <Shield className="w-5 h-5 text-green-400 mr-2" />
+                  Security Features
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-300">Digital Watermark</span>
+                    <CheckCircle className="w-5 h-5 text-green-400" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-300">Tamper Detection</span>
+                    <CheckCircle className="w-5 h-5 text-green-400" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-300">Blockchain Hash</span>
+                    <CheckCircle className="w-5 h-5 text-green-400" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-300">Digital Signature</span>
+                    <CheckCircle className="w-5 h-5 text-green-400" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Verification Status */}
+            <div className="bg-white/10 rounded-xl p-6">
+              <h3 className="text-lg font-bold text-white mb-4 flex items-center">
+                <Award className="w-5 h-5 text-gold-400 mr-2" />
+                Verification Status
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {Object.entries(originalDocument.authenticity).map(([key, value]) => (
+                  <div key={key} className="text-center">
+                    <div className={`text-2xl font-bold mb-1 ${
+                      value >= 90 ? 'text-green-400' :
+                      value >= 70 ? 'text-yellow-400' :
+                      value >= 50 ? 'text-orange-400' : 'text-red-400'
+                    }`}>{value}%</div>
+                    <div className="text-xs text-gray-400 capitalize">
+                      {key.replace(/([A-Z])/g, ' $1').trim()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-center mt-8 space-x-4">
+            <button 
+              onClick={() => downloadDocument(originalDocument)}
+              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl font-medium transition-all flex items-center gap-2"
+            >
+              <Download className="w-5 h-5" />
+              Download Original
+            </button>
+            <button 
+              onClick={() => window.open(`https://etherscan.io/tx/${originalDocument.blockchainHash}`, '_blank')}
+              className="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl font-medium transition-all flex items-center gap-2"
+            >
+              <Globe className="w-5 h-5" />
+              View on Blockchain
+            </button>
           </div>
         </motion.div>
       </motion.div>
@@ -488,6 +693,11 @@ export default function AuthenticityContent() {
       {/* Document Detail Modal */}
       <AnimatePresence>
         {selectedDocument && <DocumentDetail documentId={selectedDocument} />}
+      </AnimatePresence>
+
+      {/* Original Document Modal */}
+      <AnimatePresence>
+        {showOriginalModal && <OriginalDocumentModal />}
       </AnimatePresence>
     </div>
   );

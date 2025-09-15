@@ -246,9 +246,9 @@ export const useRWAMarketData = () => {
   const fetchRealMarketData = useCallback(async (): Promise<MarketData | null> => {
     try {
       const providers = {
-        ethereum: new ethers.providers.JsonRpcProvider(RPC_URLS.ethereum),
-        polygon: new ethers.providers.JsonRpcProvider(RPC_URLS.polygon),
-        bsc: new ethers.providers.JsonRpcProvider(RPC_URLS.bsc),
+        ethereum: new ethers.JsonRpcProvider(RPC_URLS.ethereum),
+        polygon: new ethers.JsonRpcProvider(RPC_URLS.polygon),
+        bsc: new ethers.JsonRpcProvider(RPC_URLS.bsc),
       };
 
       const chainData: ChainData[] = [];
@@ -265,7 +265,7 @@ export const useRWAMarketData = () => {
 
             // Get vault stats
             const [totalAssets, totalShares, currentAPY, totalYield, sharePrice] = await vaultContract.getVaultStats();
-            const tvl = parseFloat(ethers.utils.formatEther(totalAssets));
+            const tvl = parseFloat(ethers.formatEther(totalAssets));
             
             // Get recent transaction count (approximate)
             const latestBlock = await provider.getBlockNumber();

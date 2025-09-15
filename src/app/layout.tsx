@@ -3,6 +3,7 @@ import { Inter, Playfair_Display } from "next/font/google";
 import { Providers } from "./providers";
 import { WalletProvider } from "@/contexts/WalletContext";
 import { Web3OnboardingProvider } from "@/contexts/Web3OnboardingContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import "./globals.css";
 
 const inter = Inter({ 
@@ -39,11 +40,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${playfair.variable} font-sans`}>
-        <WalletProvider>
-          <Web3OnboardingProvider>
-            <Providers>{children}</Providers>
-          </Web3OnboardingProvider>
-        </WalletProvider>
+        <ThemeProvider>
+          <WalletProvider>
+            <Web3OnboardingProvider>
+              <Providers>{children}</Providers>
+            </Web3OnboardingProvider>
+          </WalletProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

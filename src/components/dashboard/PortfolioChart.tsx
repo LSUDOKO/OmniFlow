@@ -2,17 +2,19 @@
 
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { formatChartDate } from "@/lib/date-utils";
+import { formatChartDate, formatDate } from "@/lib/date-utils";
+import { formatCurrency, formatPercentage } from "@/lib/utils";
 import {
   LineChart,
   Line,
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
+  Tooltip as RechartsTooltip,
   ResponsiveContainer,
   AreaChart,
   Area,
+  Legend,
 } from 'recharts';
 import {
   Box,
@@ -24,7 +26,6 @@ import {
   Icon,
   Tooltip as ChakraTooltip,
   Spinner,
-  Legend,
   useColorModeValue,
 } from "@chakra-ui/react";
 import { FaInfoCircle } from "react-icons/fa";
@@ -193,9 +194,9 @@ export default function PortfolioChart({ data, isLoading = false }: PortfolioCha
             <Text fontWeight="bold" fontSize="lg">
               Portfolio Performance
             </Text>
-            <Tooltip label="Interactive chart showing your portfolio performance over time">
+            <ChakraTooltip label="Portfolio performance over time">
               <Icon as={FaInfoCircle} color="gray.400" boxSize={4} />
-            </Tooltip>
+            </ChakraTooltip>
           </HStack>
 
           <HStack spacing={4} wrap="wrap">
@@ -244,7 +245,7 @@ export default function PortfolioChart({ data, isLoading = false }: PortfolioCha
                 <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
                 <XAxis 
                   dataKey="date" 
-                  tickFormatter={formatDate}
+                  tickFormatter={(value) => formatDate(value)}
                   stroke="#666"
                   fontSize={12}
                 />
@@ -288,7 +289,7 @@ export default function PortfolioChart({ data, isLoading = false }: PortfolioCha
                 <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
                 <XAxis 
                   dataKey="date" 
-                  tickFormatter={formatDate}
+                  tickFormatter={(value) => formatDate(value)}
                   stroke="#666"
                   fontSize={12}
                 />

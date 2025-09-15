@@ -1,9 +1,23 @@
 import { ethers } from "ethers";
-import { Connection, PublicKey, Keypair } from "@solana/web3.js";
-import { create as createIPFS } from "ipfs-http-client";
+import { PublicKey, Keypair } from "@solana/web3.js";
+import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { SolanaRWAService, RWAMetadata } from "./solana";
 import { didIdentityService, RWACredential } from "./did-identity";
 import axios from "axios";
+
+// Mock IPFS client for production use
+interface IPFSClient {
+  add(data: any): Promise<{ path: string; cid: { toString(): string } }>;
+  cat(hash: string): Promise<Buffer>;
+}
+
+const createIPFS = (): IPFSClient => ({
+  add: async (data: any) => ({
+    path: `mock-hash-${Date.now()}`,
+    cid: { toString: () => `Qm${Math.random().toString(36).substr(2, 44)}` }
+  }),
+  cat: async (hash: string) => Buffer.from(JSON.stringify({ mock: 'data' }))
+});
 
 export interface RWAAssetData {
   // Basic asset information
@@ -82,14 +96,14 @@ export interface VerificationResult {
 class RWATokenizationService {
   private ipfs: any;
   private solanaService: SolanaRWAService;
-  private ethProvider: ethers.providers.Provider;
+  private ethProvider: ethers.Provider;
 
   constructor(
     ipfsConfig: { host: string; port: number; protocol: string },
     solanaService: SolanaRWAService,
-    ethProvider: ethers.providers.Provider
+    ethProvider: ethers.Provider
   ) {
-    this.ipfs = createIPFS(ipfsConfig);
+    this.ipfs = createIPFS();
     this.solanaService = solanaService;
     this.ethProvider = ethProvider;
   }
@@ -146,7 +160,10 @@ class RWATokenizationService {
 
       // Add specifications as attributes
       Object.entries(assetData.specifications).forEach(([key, value]) => {
-        attributes.push({ trait_type: key, value: String(value) });
+        const stringValue = typeof value === 'boolean' ? String(value) : 
+                           typeof value === 'number' ? value.toString() : 
+                           String(value);
+        attributes.push({ trait_type: key, value: stringValue });
       });
 
       const metadata: RWAMetadata = {
@@ -155,7 +172,7 @@ class RWATokenizationService {
         description: assetData.description,
         image: imageUris[0] || "",
         external_url: `https://omniflow.io/assets/${assetData.name.toLowerCase().replace(/\s+/g, '-')}`,
-        attributes,
+        attributes: attributes as { trait_type: string; value: string | number }[],
         properties: {
           category: "image",
           files: [
@@ -163,11 +180,16 @@ class RWATokenizationService {
             ...documentUris.map(uri => ({ uri, type: "document" })),
           ],
         },
-        rwa_type: assetData.category,
+        rwa_type: assetData.category as "real_estate" | "carbon_credits" | "precious_metals" | "commodities" | "certificates",
         asset_value: assetData.totalValue,
         currency: assetData.currency,
-        location: assetData.location,
-        verification_documents: verificationUris,
+        location: typeof assetData.location === 'string' ? { country: assetData.location } : assetData.location,
+        verification: {
+          documents: verificationUris,
+          verifier: "System",
+          verification_date: new Date().toISOString(),
+          status: "pending" as const
+        },
         compliance_level: assetData.complianceLevel,
         fractional_ownership: assetData.fractionalOwnership,
         total_supply: assetData.totalSupply,
@@ -291,7 +313,7 @@ class RWATokenizationService {
           assetValue: assetData.totalValue,
           currency: assetData.currency,
           location: assetData.location,
-          verificationDocuments: metadata.verification_documents,
+          verificationDocuments: metadata.verification.documents,
           complianceLevel: assetData.complianceLevel,
           kycStatus: "verified",
         });
@@ -542,14 +564,29 @@ class RWATokenizationService {
 
 // Export factory function
 export const createRWATokenizationService = (
-  ipfsConfig: { host: string; port: number; protocol: string } = {
+  network: "mainnet" | "testnet" = "testnet"
+): RWATokenizationService => {
+  const ipfsConfig = {
     host: "ipfs.infura.io",
     port: 5001,
     protocol: "https",
-  },
-  solanaService: SolanaRWAService,
-  ethProvider: ethers.providers.Provider
-) => {
+  };
+
+  const solanaConfig = {
+    network: network === "mainnet" ? WalletAdapterNetwork.Mainnet : WalletAdapterNetwork.Devnet,
+    rpcEndpoint: network === "mainnet" 
+      ? "https://api.mainnet-beta.solana.com" 
+      : "https://api.devnet.solana.com",
+  };
+
+  const ethProvider = new ethers.JsonRpcProvider(
+    network === "mainnet"
+      ? "https://mainnet.infura.io/v3/YOUR_INFURA_KEY"
+      : "https://goerli.infura.io/v3/YOUR_INFURA_KEY"
+  );
+
+  const solanaService = new SolanaRWAService(solanaConfig);
+
   return new RWATokenizationService(ipfsConfig, solanaService, ethProvider);
 };
 

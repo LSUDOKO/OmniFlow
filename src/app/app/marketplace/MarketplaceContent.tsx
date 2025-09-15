@@ -21,6 +21,8 @@ import {
 import AssetCard from '@/components/marketplace/AssetCard';
 import AssetListItem from '@/components/marketplace/AssetListItem';
 import TransactionModal from '@/components/marketplace/TransactionModal';
+import { portfolioService } from '@/services/portfolioService';
+import { useToast } from '@chakra-ui/react';
 
 // Enhanced mock data with more realistic RWA assets
 const mockAssets = [
@@ -163,7 +165,9 @@ export default function MarketplaceContent() {
   const [selectedFilter, setSelectedFilter] = useState('All Assets');
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [purchaseAmount, setPurchaseAmount] = useState(1);
   const { address, isConnected } = useAccount();
+  const toast = useToast();
 
   const filteredAssets = mockAssets.filter(asset => {
     const matchesFilter = selectedFilter === 'All Assets' || asset.type === selectedFilter;
@@ -186,12 +190,101 @@ export default function MarketplaceContent() {
     setSelectedAsset(null);
   };
 
-  const handleConfirmTransaction = async () => {
-    console.log(`Processing purchase for ${selectedAsset?.name}`);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    const success = Math.random() > 0.2;
-    console.log(success ? 'Transaction successful' : 'Transaction failed');
-    return success;
+  const handleConfirmTransaction = async (amount: number) => {
+    if (!selectedAsset || !address) {
+      return false;
+    }
+
+    try {
+      console.log(`Processing purchase for ${selectedAsset.name} - ${amount} tokens`);
+      
+      // Simulate transaction processing
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const success = Math.random() > 0.2; // 80% success rate for demo
+      
+      if (success) {
+        // Set wallet address in portfolio service
+        portfolioService.setWalletAddress(address);
+        
+        // Add purchased asset to portfolio
+        const purchaseData = {
+          id: selectedAsset.id,
+          name: selectedAsset.name,
+          type: selectedAsset.type,
+          category: selectedAsset.type.toLowerCase().replace(/\s+/g, '-'),
+          tokensPurchased: amount,
+          pricePerToken: selectedAsset.pricePerToken,
+          apy: selectedAsset.yield,
+          location: getLocationFromAssetType(selectedAsset.type),
+          solanaProgram: generateMockSolanaProgram(),
+          mintAddress: generateMockMintAddress(),
+          transactionHash: generateMockTxHash()
+        };
+        
+        portfolioService.addPurchasedRWAAsset(purchaseData);
+        
+        // Show success toast
+        toast({
+          title: 'Purchase Successful!',
+          description: `${amount} tokens of ${selectedAsset.name} added to your portfolio`,
+          status: 'success',
+          duration: 5000,
+          isClosable: true,
+        });
+        
+        console.log('Asset added to portfolio:', purchaseData);
+        return true;
+      } else {
+        // Show error toast
+        toast({
+          title: 'Transaction Failed',
+          description: 'Unable to complete the purchase. Please try again.',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+        return false;
+      }
+    } catch (error) {
+      console.error('Error processing transaction:', error);
+      toast({
+        title: 'Transaction Error',
+        description: 'An unexpected error occurred during the transaction.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+      return false;
+    }
+  };
+
+  // Helper functions for mock data generation
+  const getLocationFromAssetType = (type: string): string => {
+    const locationMap: { [key: string]: string } = {
+      'Real Estate': 'United States',
+      'Carbon Credits': 'Brazil',
+      'Precious Metals': 'Switzerland',
+      'Infrastructure': 'Germany',
+      'Art & Collectibles': 'United Kingdom',
+      'Commodities': 'Australia'
+    };
+    return locationMap[type] || 'United States';
+  };
+
+  const generateMockSolanaProgram = (): string => {
+    return `omniflow_rwa_${Math.random().toString(36).substr(2, 8)}`;
+  };
+
+  const generateMockMintAddress = (): string => {
+    return Array.from({ length: 44 }, () => 
+      'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'[Math.floor(Math.random() * 58)]
+    ).join('');
+  };
+
+  const generateMockTxHash = (): string => {
+    return Array.from({ length: 64 }, () => 
+      '0123456789abcdef'[Math.floor(Math.random() * 16)]
+    ).join('');
   };
 
   return (

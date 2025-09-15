@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRealTimeBridge, useRealTimeBridgeMonitor } from "../../hooks/useRealTimeBridge";
 import {
   Box,
   Card,
@@ -58,61 +59,23 @@ interface BridgeMetrics {
   totalValueLocked: string;
 }
 
-const mockNetworkStatus: NetworkStatus[] = [
-  {
-    chainId: 1,
-    name: "Ethereum",
-    status: "online",
-    gasPrice: "25 gwei",
-    congestion: 75,
-    lastBlock: 18500000,
-    validators: 500000,
-    bridgeBalance: "1,250 ETH",
-  },
-  {
-    chainId: 137,
-    name: "Polygon",
-    status: "online",
-    gasPrice: "35 gwei",
-    congestion: 45,
-    lastBlock: 48500000,
-    validators: 100,
-    bridgeBalance: "50,000 MATIC",
-  },
-  {
-    chainId: 56,
-    name: "BSC",
-    status: "congested",
-    gasPrice: "8 gwei",
-    congestion: 85,
-    lastBlock: 32500000,
-    validators: 21,
-    bridgeBalance: "2,500 BNB",
-  },
-  {
-    chainId: 1001,
-    name: "OneChain Testnet",
-    status: "online",
-    gasPrice: "1 gwei",
-    congestion: 25,
-    lastBlock: 1500000,
-    validators: 50,
-    bridgeBalance: "10,000 OCT",
-  },
-];
-
-const mockMetrics: BridgeMetrics = {
-  totalVolume24h: "$2.4M",
-  totalTransactions24h: 1247,
-  averageTime: "8.5 min",
-  successRate: 99.2,
-  totalValueLocked: "$45.8M",
-};
 
 export default function BridgeMonitor() {
-  const [networkStatus, setNetworkStatus] = useState<NetworkStatus[]>(mockNetworkStatus);
-  const [metrics, setMetrics] = useState<BridgeMetrics>(mockMetrics);
-  const [isLoading, setIsLoading] = useState(false);
+  const {
+    networkStatus,
+    bridgeMetrics: metrics,
+    isLoading,
+    error,
+    isConnected,
+    refreshData
+  } = useRealTimeBridge({
+    network: 'testnet',
+    autoRefresh: true,
+    refreshInterval: 30000,
+    enableWebSocket: true
+  });
+
+  const { notifications, clearNotifications, removeNotification } = useRealTimeBridgeMonitor();
   
   const cardBg = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.600");
@@ -141,16 +104,12 @@ export default function BridgeMonitor() {
     return "red";
   };
 
-  const refreshData = async () => {
-    setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsLoading(false);
-  };
 
+  // Request notification permission on mount
   useEffect(() => {
-    const interval = setInterval(refreshData, 30000); // Refresh every 30 seconds
-    return () => clearInterval(interval);
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
   }, []);
 
   return (

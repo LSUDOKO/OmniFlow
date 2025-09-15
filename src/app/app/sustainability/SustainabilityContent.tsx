@@ -29,7 +29,12 @@ import {
   Droplets,
   TreePine,
   Factory,
-  Building
+  Building,
+  X,
+  Upload,
+  MapPin,
+  Calendar,
+  Target
 } from 'lucide-react';
 
 const esgAssets = [
@@ -157,6 +162,13 @@ export default function SustainabilityContent() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedAsset, setSelectedAsset] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showAddAssetModal, setShowAddAssetModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [newAssetName, setNewAssetName] = useState('');
+  const [showInvestModal, setShowInvestModal] = useState(false);
+  const [showInvestSuccessModal, setShowInvestSuccessModal] = useState(false);
+  const [selectedInvestAsset, setSelectedInvestAsset] = useState<string>('');
+  const [investmentAmount, setInvestmentAmount] = useState('');
   const { address, isConnected } = useAccount();
 
   const filteredAssets = esgAssets.filter(asset => {
@@ -259,6 +271,535 @@ export default function SustainabilityContent() {
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
+      </motion.div>
+    );
+  };
+
+  const handleAddAsset = () => {
+    // Simulate adding the asset
+    setShowAddAssetModal(false);
+    setShowSuccessModal(true);
+    
+    // Auto-close success modal after 2 seconds
+    setTimeout(() => {
+      setShowSuccessModal(false);
+      setNewAssetName('');
+    }, 2000);
+  };
+
+  const downloadESGReport = (asset: typeof esgAssets[0]) => {
+    const reportData = {
+      assetId: asset.id,
+      assetName: asset.name,
+      reportType: 'ESG Impact Report',
+      generatedDate: new Date().toISOString(),
+      assetDetails: {
+        type: asset.type,
+        category: asset.category,
+        location: asset.location,
+        value: asset.value,
+        apy: asset.apy,
+        riskLevel: asset.riskLevel,
+        status: asset.status,
+        lastUpdated: asset.lastUpdated
+      },
+      esgScores: {
+        overall: asset.esgScore.overall,
+        environmental: asset.esgScore.environmental,
+        social: asset.esgScore.social,
+        governance: asset.esgScore.governance
+      },
+      impactMetrics: asset.impact,
+      certifications: asset.certifications,
+      sustainabilityAnalysis: {
+        carbonFootprint: 'Net negative - removes more CO2 than produced',
+        socialImpact: 'High positive impact on local communities',
+        governanceRating: 'Excellent transparency and accountability',
+        complianceStatus: 'Fully compliant with ESG standards',
+        riskAssessment: 'Low environmental and social risks'
+      },
+      financialProjections: {
+        expectedReturn: `${asset.apy}% annually`,
+        paymentSchedule: 'Quarterly distributions',
+        liquidityOptions: 'Available after 12-month lock period',
+        taxImplications: 'Eligible for green investment tax credits'
+      },
+      verificationDetails: {
+        auditedBy: 'Third-party ESG verification agency',
+        lastAuditDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+        nextAuditDate: new Date(Date.now() + 335 * 24 * 60 * 60 * 1000).toISOString(),
+        blockchainVerification: 'Verified on Ethereum mainnet',
+        transactionHash: '0x' + Math.random().toString(16).substr(2, 40)
+      }
+    };
+
+    const jsonString = JSON.stringify(reportData, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${asset.name.replace(/\s+/g, '_')}_ESG_Report.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleInvestClick = (assetName: string) => {
+    setSelectedInvestAsset(assetName);
+    setShowInvestModal(true);
+  };
+
+  const handleInvestConfirm = () => {
+    setShowInvestModal(false);
+    setShowInvestSuccessModal(true);
+    
+    // Auto-close success modal after 2 seconds
+    setTimeout(() => {
+      setShowInvestSuccessModal(false);
+      setSelectedInvestAsset('');
+      setInvestmentAmount('');
+    }, 2000);
+  };
+
+  const AddAssetModal = () => {
+    return (
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        onClick={() => setShowAddAssetModal(false)}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          className="bg-gradient-to-br from-slate-800 to-slate-700 border-2 border-green-400/40 rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-blue-500 rounded-xl flex items-center justify-center">
+                <Plus className="w-5 h-5 text-white" />
+              </div>
+              Add New ESG Asset
+            </h2>
+            <button
+              onClick={() => setShowAddAssetModal(false)}
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Asset Name *
+              </label>
+              <input
+                type="text"
+                value={newAssetName}
+                onChange={(e) => setNewAssetName(e.target.value)}
+                placeholder="e.g., Wind Farm Project Alpha"
+                className="w-full px-4 py-3 bg-white/10 border-2 border-green-400/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-green-400/60 transition-colors"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Asset Type
+                </label>
+                <select className="w-full px-4 py-3 bg-white/10 border-2 border-green-400/30 rounded-xl text-white focus:outline-none focus:border-green-400/60 transition-colors">
+                  <option value="">Select Type</option>
+                  <option value="renewable-energy">Renewable Energy</option>
+                  <option value="carbon-credits">Carbon Credits</option>
+                  <option value="green-real-estate">Green Real Estate</option>
+                  <option value="environmental-impact">Environmental Impact</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Category
+                </label>
+                <select className="w-full px-4 py-3 bg-white/10 border-2 border-green-400/30 rounded-xl text-white focus:outline-none focus:border-green-400/60 transition-colors">
+                  <option value="">Select Category</option>
+                  <option value="environmental">Environmental</option>
+                  <option value="social">Social Impact</option>
+                  <option value="governance">Governance</option>
+                  <option value="energy">Clean Energy</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <MapPin className="w-4 h-4 inline mr-1" />
+                  Location
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g., California, USA"
+                  className="w-full px-4 py-3 bg-white/10 border-2 border-green-400/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-green-400/60 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <DollarSign className="w-4 h-4 inline mr-1" />
+                  Asset Value (USD)
+                </label>
+                <input
+                  type="number"
+                  placeholder="e.g., 5000000"
+                  className="w-full px-4 py-3 bg-white/10 border-2 border-green-400/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-green-400/60 transition-colors"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                <Target className="w-4 h-4 inline mr-1" />
+                Impact Description
+              </label>
+              <textarea
+                rows={4}
+                placeholder="Describe the environmental and social impact of this asset..."
+                className="w-full px-4 py-3 bg-white/10 border-2 border-green-400/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-green-400/60 transition-colors resize-none"
+              />
+            </div>
+
+            <div className="bg-green-500/10 border border-green-400/30 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Upload className="w-5 h-5 text-green-400" />
+                <span className="text-green-300 font-medium">Document Upload</span>
+              </div>
+              <p className="text-sm text-gray-300 mb-3">
+                Upload ESG certificates, impact reports, and verification documents
+              </p>
+              <button className="px-4 py-2 bg-green-500/20 border border-green-400/50 text-green-300 rounded-lg hover:bg-green-500/30 transition-colors text-sm">
+                Choose Files
+              </button>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-4 mt-8">
+            <button
+              onClick={() => setShowAddAssetModal(false)}
+              className="px-6 py-3 bg-gray-500/20 border border-gray-400/50 text-gray-300 rounded-xl hover:bg-gray-500/30 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleAddAsset}
+              disabled={!newAssetName.trim()}
+              className="px-6 py-3 bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white rounded-xl font-medium transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Plus className="w-4 h-4" />
+              Add Asset
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+    );
+  };
+
+  const InvestModal = () => {
+    return (
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        onClick={() => setShowInvestModal(false)}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          className="bg-gradient-to-br from-slate-800 to-slate-700 border-2 border-green-400/40 rounded-2xl p-8 max-w-lg w-full"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-blue-500 rounded-xl flex items-center justify-center">
+                <DollarSign className="w-5 h-5 text-white" />
+              </div>
+              Invest in ESG Asset
+            </h2>
+            <button
+              onClick={() => setShowInvestModal(false)}
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+
+          <div className="bg-green-500/10 border border-green-400/30 rounded-xl p-4 mb-6">
+            <h3 className="text-lg font-bold text-white mb-2">{selectedInvestAsset}</h3>
+            <p className="text-green-300 text-sm">Sustainable investment with measurable impact</p>
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Investment Amount (USD) *
+              </label>
+              <input
+                type="number"
+                value={investmentAmount}
+                onChange={(e) => setInvestmentAmount(e.target.value)}
+                placeholder="e.g., 10000"
+                className="w-full px-4 py-3 bg-white/10 border-2 border-green-400/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-green-400/60 transition-colors"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Investment Type
+                </label>
+                <select className="w-full px-4 py-3 bg-white/10 border-2 border-green-400/30 rounded-xl text-white focus:outline-none focus:border-green-400/60 transition-colors">
+                  <option value="direct">Direct Investment</option>
+                  <option value="fractional">Fractional Shares</option>
+                  <option value="recurring">Recurring Investment</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Lock Period
+                </label>
+                <select className="w-full px-4 py-3 bg-white/10 border-2 border-green-400/30 rounded-xl text-white focus:outline-none focus:border-green-400/60 transition-colors">
+                  <option value="6m">6 Months</option>
+                  <option value="12m">12 Months</option>
+                  <option value="24m">24 Months</option>
+                  <option value="36m">36 Months</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="bg-blue-500/10 border border-blue-400/30 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="w-5 h-5 text-blue-400" />
+                <span className="text-blue-300 font-medium">Investment Summary</span>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-300">Expected Annual Return:</span>
+                  <span className="text-green-400 font-semibold">12.3%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-300">Risk Level:</span>
+                  <span className="text-yellow-400 font-semibold">Medium</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-300">ESG Impact Score:</span>
+                  <span className="text-green-400 font-semibold">95/100</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-4 mt-8">
+            <button
+              onClick={() => setShowInvestModal(false)}
+              className="px-6 py-3 bg-gray-500/20 border border-gray-400/50 text-gray-300 rounded-xl hover:bg-gray-500/30 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleInvestConfirm}
+              disabled={!investmentAmount.trim()}
+              className="px-6 py-3 bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white rounded-xl font-medium transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <DollarSign className="w-4 h-4" />
+              Confirm Investment
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+    );
+  };
+
+  const InvestSuccessModal = () => {
+    return (
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          className="bg-gradient-to-br from-green-800 to-green-700 border-2 border-green-400/50 rounded-2xl p-8 max-w-md w-full text-center relative overflow-hidden"
+        >
+          {/* Animated particles */}
+          {[...Array(8)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-2 h-2 bg-green-400 rounded-full"
+              initial={{
+                x: Math.random() * 300 - 150,
+                y: Math.random() * 200 - 100,
+                opacity: 0,
+                scale: 0
+              }}
+              animate={{
+                x: Math.random() * 400 - 200,
+                y: Math.random() * 300 - 150,
+                opacity: [0, 1, 0],
+                scale: [0, 1, 0]
+              }}
+              transition={{
+                duration: 2,
+                delay: Math.random() * 0.5,
+                repeat: Infinity,
+                repeatDelay: 1
+              }}
+            />
+          ))}
+
+          <motion.div
+            className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+          >
+            <CheckCircle className="w-8 h-8 text-white" />
+          </motion.div>
+
+          <motion.h2
+            className="text-2xl font-bold text-white mb-2"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            Investment Successful!
+          </motion.h2>
+
+          <motion.p
+            className="text-green-200 mb-4"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+          >
+            Your investment in "{selectedInvestAsset}" has been confirmed and processed.
+          </motion.p>
+
+          <motion.div
+            className="text-sm text-green-300"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+          >
+            Welcome to sustainable investing! 💚
+          </motion.div>
+
+          <motion.div
+            className="absolute top-4 right-4 w-6 h-6 text-green-300"
+            initial={{ scale: 0, rotate: 0 }}
+            animate={{ scale: 1, rotate: 360 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+          >
+            <DollarSign className="w-6 h-6" />
+          </motion.div>
+        </motion.div>
+      </motion.div>
+    );
+  };
+
+  const SuccessModal = () => {
+    return (
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          className="bg-gradient-to-br from-green-800 to-green-700 border-2 border-green-400/50 rounded-2xl p-8 max-w-md w-full text-center relative overflow-hidden"
+        >
+          {/* Animated particles */}
+          {[...Array(8)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-2 h-2 bg-green-400 rounded-full"
+              initial={{
+                x: Math.random() * 300 - 150,
+                y: Math.random() * 200 - 100,
+                opacity: 0,
+                scale: 0
+              }}
+              animate={{
+                x: Math.random() * 400 - 200,
+                y: Math.random() * 300 - 150,
+                opacity: [0, 1, 0],
+                scale: [0, 1, 0]
+              }}
+              transition={{
+                duration: 2,
+                delay: Math.random() * 0.5,
+                repeat: Infinity,
+                repeatDelay: 1
+              }}
+            />
+          ))}
+
+          <motion.div
+            className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+          >
+            <CheckCircle className="w-8 h-8 text-white" />
+          </motion.div>
+
+          <motion.h2
+            className="text-2xl font-bold text-white mb-2"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            ESG Asset Added Successfully!
+          </motion.h2>
+
+          <motion.p
+            className="text-green-200 mb-4"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+          >
+            {newAssetName ? `"${newAssetName}"` : 'Your new asset'} has been added to your sustainable portfolio.
+          </motion.p>
+
+          <motion.div
+            className="text-sm text-green-300"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+          >
+            Ready for impact investing! 🌱
+          </motion.div>
+
+          <motion.div
+            className="absolute top-4 right-4 w-6 h-6 text-green-300"
+            initial={{ scale: 0, rotate: 0 }}
+            animate={{ scale: 1, rotate: 360 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+          >
+            <Leaf className="w-6 h-6" />
+          </motion.div>
+        </motion.div>
       </motion.div>
     );
   };
@@ -374,11 +915,17 @@ export default function SustainabilityContent() {
               Sustainable investment verified
             </div>
             <div className="flex space-x-3">
-              <button className="px-6 py-2 bg-blue-500/20 border border-blue-400/50 text-blue-300 rounded-xl hover:bg-blue-500/30 transition-colors flex items-center">
+              <button 
+                onClick={() => downloadESGReport(asset)}
+                className="px-6 py-2 bg-blue-500/20 border border-blue-400/50 text-blue-300 rounded-xl hover:bg-blue-500/30 transition-colors flex items-center"
+              >
                 <Download className="w-4 h-4 mr-2" />
                 ESG Report
               </button>
-              <button className="px-6 py-2 bg-green-500/20 border border-green-400/50 text-green-300 rounded-xl hover:bg-green-500/30 transition-colors flex items-center">
+              <button 
+                onClick={() => handleInvestClick(asset.name)}
+                className="px-6 py-2 bg-green-500/20 border border-green-400/50 text-green-300 rounded-xl hover:bg-green-500/30 transition-colors flex items-center"
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Invest
               </button>
@@ -405,7 +952,10 @@ export default function SustainabilityContent() {
             Invest in sustainable assets with measurable environmental and social impact
           </p>
         </div>
-        <button className="px-6 py-3 bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white rounded-xl font-medium transition-all flex items-center gap-2">
+        <button 
+          onClick={() => setShowAddAssetModal(true)}
+          className="px-6 py-3 bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white rounded-xl font-medium transition-all flex items-center gap-2"
+        >
           <Plus className="w-5 h-5" />
           Add ESG Asset
         </button>
@@ -505,6 +1055,26 @@ export default function SustainabilityContent() {
       {/* Asset Detail Modal */}
       <AnimatePresence>
         {selectedAsset && <AssetDetail assetId={selectedAsset} />}
+      </AnimatePresence>
+
+      {/* Add Asset Modal */}
+      <AnimatePresence>
+        {showAddAssetModal && <AddAssetModal />}
+      </AnimatePresence>
+
+      {/* Success Modal */}
+      <AnimatePresence>
+        {showSuccessModal && <SuccessModal />}
+      </AnimatePresence>
+
+      {/* Invest Modal */}
+      <AnimatePresence>
+        {showInvestModal && <InvestModal />}
+      </AnimatePresence>
+
+      {/* Invest Success Modal */}
+      <AnimatePresence>
+        {showInvestSuccessModal && <InvestSuccessModal />}
       </AnimatePresence>
     </div>
   );

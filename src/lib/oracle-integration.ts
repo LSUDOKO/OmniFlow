@@ -42,13 +42,13 @@ export interface OracleConfig {
 }
 
 class OracleIntegrationService {
-  private provider: ethers.providers.JsonRpcProvider;
+  private provider: ethers.JsonRpcProvider;
   private config: OracleConfig;
   private priceFeeds: Map<string, ethers.Contract> = new Map();
 
   constructor(config: OracleConfig) {
     this.config = config;
-    this.provider = new ethers.providers.JsonRpcProvider(config.rpcUrl);
+    this.provider = new ethers.JsonRpcProvider(config.rpcUrl);
     this.initializePriceFeeds();
   }
 
@@ -78,7 +78,7 @@ class OracleIntegrationService {
 
       const priceData: PriceFeedData = {
         asset: description,
-        price: parseFloat(ethers.utils.formatUnits(price, decimals)),
+        price: parseFloat(ethers.formatUnits(price, decimals)),
         decimals,
         updatedAt: updatedAt.toNumber(),
         roundId: roundId.toString(),
@@ -480,7 +480,7 @@ class OracleIntegrationService {
    */
   private generateMockSignature(data: string): string {
     // Mock signature generation - use real cryptographic signing in production
-    return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(data + Date.now()));
+    return ethers.keccak256(ethers.toUtf8Bytes(data + Date.now()));
   }
 }
 

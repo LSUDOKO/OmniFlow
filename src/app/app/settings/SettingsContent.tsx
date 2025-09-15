@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
+import { useTheme } from '../../../contexts/ThemeContext';
 import {
   Settings,
   User,
@@ -67,13 +68,18 @@ const settingsCategories = [
 ];
 
 export default function SettingsContent() {
-  const [activeCategory, setActiveCategory] = useState('profile');
-  const [darkMode, setDarkMode] = useState(true);
-  const [notifications, setNotifications] = useState(true);
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [activeCategory, setActiveCategory] = useState('appearance');
+  const [notifications, setNotifications] = useState({
+    transactions: true,
+    security: true,
+    marketing: false,
+    mobile: true
+  });
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [showPrivateKey, setShowPrivateKey] = useState(false);
+  const [selectedThemeColor, setSelectedThemeColor] = useState('gold');
   const { address, isConnected } = useAccount();
+  const { settings, toggleDarkMode, toggleSound, setThemeColor, playSound } = useTheme();
 
   const ProfileSettings = () => (
     <motion.div
@@ -143,7 +149,10 @@ export default function SettingsContent() {
               </div>
             </div>
             <button
-              onClick={() => setTwoFactorEnabled(!twoFactorEnabled)}
+              onClick={() => {
+                setTwoFactorEnabled(!twoFactorEnabled);
+                playSound(twoFactorEnabled ? 'error' : 'success');
+              }}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                 twoFactorEnabled ? 'bg-green-500' : 'bg-gray-600'
               }`}
@@ -163,7 +172,10 @@ export default function SettingsContent() {
                 <div className="font-bold text-yellow-100">Private Key</div>
               </div>
               <button
-                onClick={() => setShowPrivateKey(!showPrivateKey)}
+                onClick={() => {
+                  setShowPrivateKey(!showPrivateKey);
+                  playSound('click');
+                }}
                 className="flex items-center space-x-2 px-3 py-1 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-400/50 rounded-lg transition-all"
               >
                 {showPrivateKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -215,6 +227,7 @@ export default function SettingsContent() {
             { id: 'mobile', label: 'Mobile Push', desc: 'Push notifications on mobile devices', icon: Smartphone }
           ].map((item) => {
             const Icon = item.icon;
+            const isEnabled = notifications[item.id as keyof typeof notifications];
             return (
               <div key={item.id} className="flex items-center justify-between p-4 bg-white/10 rounded-xl">
                 <div className="flex items-center space-x-3">
@@ -225,13 +238,17 @@ export default function SettingsContent() {
                   </div>
                 </div>
                 <button
+                  onClick={() => {
+                    setNotifications(prev => ({ ...prev, [item.id]: !prev[item.id as keyof typeof prev] }));
+                    playSound('click');
+                  }}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    notifications ? 'bg-yellow-500' : 'bg-gray-600'
+                    isEnabled ? 'bg-yellow-500' : 'bg-gray-600'
                   }`}
                 >
                   <span
                     className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      notifications ? 'translate-x-6' : 'translate-x-1'
+                      isEnabled ? 'translate-x-6' : 'translate-x-1'
                     }`}
                   />
                 </button>
@@ -257,21 +274,24 @@ export default function SettingsContent() {
         <div className="space-y-6">
           <div className="flex items-center justify-between p-4 bg-white/10 rounded-xl">
             <div className="flex items-center space-x-3">
-              {darkMode ? <Moon className="w-5 h-5 text-purple-400" /> : <Sun className="w-5 h-5 text-yellow-400" />}
+              {settings.mode === 'dark' ? <Moon className="w-5 h-5 text-purple-400" /> : <Sun className="w-5 h-5 text-yellow-400" />}
               <div>
                 <div className="font-bold text-purple-100">Dark Mode</div>
                 <div className="text-sm text-purple-200">Toggle between light and dark themes</div>
               </div>
             </div>
             <button
-              onClick={() => setDarkMode(!darkMode)}
+              onClick={() => {
+                toggleDarkMode();
+                playSound('click');
+              }}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                darkMode ? 'bg-purple-500' : 'bg-gray-600'
+                settings.mode === 'dark' ? 'bg-purple-500' : 'bg-gray-600'
               }`}
             >
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  darkMode ? 'translate-x-6' : 'translate-x-1'
+                  settings.mode === 'dark' ? 'translate-x-6' : 'translate-x-1'
                 }`}
               />
             </button>
@@ -279,21 +299,21 @@ export default function SettingsContent() {
 
           <div className="flex items-center justify-between p-4 bg-white/10 rounded-xl">
             <div className="flex items-center space-x-3">
-              {soundEnabled ? <Volume2 className="w-5 h-5 text-purple-400" /> : <VolumeX className="w-5 h-5 text-gray-400" />}
+              {settings.soundEnabled ? <Volume2 className="w-5 h-5 text-purple-400" /> : <VolumeX className="w-5 h-5 text-gray-400" />}
               <div>
                 <div className="font-bold text-purple-100">Sound Effects</div>
                 <div className="text-sm text-purple-200">Enable UI sound feedback</div>
               </div>
             </div>
             <button
-              onClick={() => setSoundEnabled(!soundEnabled)}
+              onClick={toggleSound}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                soundEnabled ? 'bg-purple-500' : 'bg-gray-600'
+                settings.soundEnabled ? 'bg-purple-500' : 'bg-gray-600'
               }`}
             >
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  soundEnabled ? 'translate-x-6' : 'translate-x-1'
+                  settings.soundEnabled ? 'translate-x-6' : 'translate-x-1'
                 }`}
               />
             </button>
@@ -303,17 +323,52 @@ export default function SettingsContent() {
             <label className="block text-sm font-bold text-purple-100 mb-3">Theme Color</label>
             <div className="grid grid-cols-4 gap-3">
               {[
-                { name: 'Gold', color: 'bg-gradient-to-br from-yellow-400 to-yellow-600' },
-                { name: 'Blue', color: 'bg-gradient-to-br from-blue-400 to-blue-600' },
-                { name: 'Purple', color: 'bg-gradient-to-br from-purple-400 to-purple-600' },
-                { name: 'Green', color: 'bg-gradient-to-br from-green-400 to-green-600' }
+                { name: 'gold', displayName: 'Gold', color: 'bg-gradient-to-br from-yellow-400 to-yellow-600' },
+                { name: 'blue', displayName: 'Blue', color: 'bg-gradient-to-br from-blue-400 to-blue-600' },
+                { name: 'purple', displayName: 'Purple', color: 'bg-gradient-to-br from-purple-400 to-purple-600' },
+                { name: 'green', displayName: 'Green', color: 'bg-gradient-to-br from-green-400 to-green-600' }
               ].map((theme) => (
                 <button
                   key={theme.name}
-                  className={`h-12 rounded-xl ${theme.color} hover:scale-105 transition-transform border-2 border-white/20 hover:border-white/40`}
-                  title={theme.name}
-                />
+                  onClick={() => {
+                    setThemeColor(theme.name as any);
+                    setSelectedThemeColor(theme.name);
+                    playSound('success');
+                  }}
+                  className={`h-12 rounded-xl ${theme.color} hover:scale-105 transition-all duration-200 border-2 ${
+                    settings.color === theme.name 
+                      ? 'border-white/80 ring-2 ring-white/40 scale-105' 
+                      : 'border-white/20 hover:border-white/40'
+                  }`}
+                  title={theme.displayName}
+                >
+                  {settings.color === theme.name && (
+                    <div className="flex items-center justify-center h-full">
+                      <Check className="w-5 h-5 text-white drop-shadow-lg" />
+                    </div>
+                  )}
+                </button>
               ))}
+            </div>
+          </div>
+
+          {/* Theme Preview */}
+          <div className="p-4 bg-white/10 rounded-xl">
+            <div className="flex items-center space-x-3 mb-3">
+              <Info className="w-5 h-5 text-blue-400" />
+              <div className="font-bold text-blue-100">Theme Preview</div>
+            </div>
+            <div className="text-sm text-gray-300 mb-3">
+              Current theme: <span className="font-semibold capitalize text-white">{settings.mode}</span> mode with <span className="font-semibold capitalize text-white">{settings.color}</span> accent
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className={`w-4 h-4 rounded-full bg-gradient-to-r ${
+                settings.color === 'gold' ? 'from-yellow-400 to-yellow-600' :
+                settings.color === 'blue' ? 'from-blue-400 to-blue-600' :
+                settings.color === 'purple' ? 'from-purple-400 to-purple-600' :
+                'from-green-400 to-green-600'
+              }`}></div>
+              <span className="text-xs text-gray-400">Primary accent color</span>
             </div>
           </div>
         </div>
@@ -438,7 +493,10 @@ export default function SettingsContent() {
                 return (
                   <button
                     key={category.id}
-                    onClick={() => setActiveCategory(category.id)}
+                    onClick={() => {
+                      setActiveCategory(category.id);
+                      playSound('click');
+                    }}
                     className={`w-full flex items-center space-x-3 p-3 rounded-xl transition-all ${
                       activeCategory === category.id
                         ? 'bg-gold-500/20 border-2 border-gold-400/50 text-gold-200'

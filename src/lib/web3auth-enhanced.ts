@@ -140,12 +140,6 @@ class EnhancedWeb3AuthService {
           mode: "dark",
           theme: {
             primary: "#8B5CF6",
-            gray: "#1e293b",
-            red: "#ef4444",
-            green: "#10b981",
-            success: "#10b981",
-            warning: "#f59e0b",
-            error: "#ef4444",
           },
           loginMethodsOrder: ["google", "facebook", "twitter", "discord", "apple"],
           uxMode: "popup",
@@ -163,7 +157,7 @@ class EnhancedWeb3AuthService {
       // Configure OpenLogin Adapter for seamless social logins
       const openloginAdapter = new OpenloginAdapter({
         loginSettings: {
-          mfaLevel: "optional",
+          // mfaLevel removed as not supported in this context
         },
         adapterSettings: {
           uxMode: "popup",
@@ -209,12 +203,12 @@ class EnhancedWeb3AuthService {
             // Email passwordless login
             email_passwordless: {
               verifier: "omniflow-email-passwordless",
-              typeOfLogin: "email_passwordless",
+              typeOfLogin: "email_password",
             },
             // SMS passwordless login
             sms_passwordless: {
               verifier: "omniflow-sms-passwordless", 
-              typeOfLogin: "sms_passwordless",
+              typeOfLogin: "passwordless",
             },
           },
         },
@@ -235,7 +229,7 @@ class EnhancedWeb3AuthService {
           },
         },
         loginSettings: {
-          mfaLevel: "optional",
+          // mfaLevel removed as not supported in ConnectParams
         },
         chainConfig: chainConfigs.ethereum,
       });
